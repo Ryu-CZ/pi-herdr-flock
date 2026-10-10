@@ -1,13 +1,44 @@
 # pi-herdr-flock
 
-Automatically loads Herdr's live instructions into Pi and adds a preference for visible, project-local Herdr workers. No extra tools or automatic worker launches.
+<p>
+  <a href="https://www.npmjs.com/package/pi-herdr-flock"><img src="https://img.shields.io/npm/v/pi-herdr-flock" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/pi-herdr-flock"><img src="https://img.shields.io/npm/dt/pi-herdr-flock" alt="npm downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/pi-herdr-flock" alt="license"></a>
+  <a href="https://pi.dev/packages/pi-herdr-flock"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
+</p>
+
+![pi-herdr-flock preview](media/github-preview.png)
+
+Guides Pi to delegate work to a visible flock of Herdr terminals.
+
+## What it does
+
+- Loads Herdr's current instructions into Pi
+- Encourages visible sibling-pane or project-local delegation
+- Keeps focus, verification, and cleanup explicit
+- Remains inactive outside Herdr
+- Never launches workers automatically
+
+## Best for
+
+- Users running Pi inside Herdr
+- Teams that want visible, auditable worker delegation
+- Workflows where focus preservation and verification matter
+
+## Not for
+
+- Automatic agent spawning
+- Hidden or background workers
+- Running outside Herdr
 
 ## Install
 
 Requires Pi **1.1.0+ (1.x)**, Node.js **22.19+**, and `herdr` on PATH.
 
+This extension does not create or launch agents. It provides guidance for using visible Herdr workers through Herdr.
+
 ```sh
-pi install git:github.com/Ryu-CZ/pi-herdr-flock
+pi install npm:pi-herdr-flock
 ```
 
 Run Pi inside Herdr, then use `/reload` if Pi was already running. Outside Herdr, the extension stays inactive.

@@ -1,14 +1,23 @@
 {
   "name": "pi-herdr-flock",
   "version": "0.2.0",
-  "description": "Live Herdr instructions and visible-worker delegation guidance for Pi inside Herdr.",
+  "description": "Guides Pi to delegate work to a visible flock of Herdr terminals.",
   "type": "module",
   "keywords": [
     "pi-package",
     "pi-extension",
     "pi",
     "herdr",
-    "delegation"
+    "flock",
+    "subagent",
+    "delegation",
+    "visible-workers",
+    "project-local",
+    "multi-agent",
+    "agent-workflow",
+    "orchestration",
+    "multiplexer",
+    "panes"
   ],
   "homepage": "https://github.com/Ryu-CZ/pi-herdr-flock#readme",
   "bugs": {
@@ -25,6 +34,7 @@
     "README.md",
     "CHANGELOG.md",
     "LICENSE",
+    "media/",
     "pi-herdr-flock"
   ],
   "engines": {
@@ -35,7 +45,7 @@
     "check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": ">=1.1.0 <2"
+    "@earendil-works/pi-coding-agent": "*"
   },
   "devDependencies": {
     "@earendil-works/pi-coding-agent": "1.1.0",
@@ -45,6 +55,7 @@
   "pi": {
     "extensions": [
       "./extensions/index.ts"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/pi-preview.png"
   }
 }
