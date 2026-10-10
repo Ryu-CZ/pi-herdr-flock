@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-10
+
 ### Added
 
 - README badges, delegation diagrams, and Pi package gallery preview metadata; include preview images in the published package
@@ -46,5 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ignore superseded initialization results and preserve complete CLI output
 - Package metadata, installation documentation, and six runtime-contract tests
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Ryu-CZ/pi-herdr-flock/releases/tag/v0.2.0
