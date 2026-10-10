@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Show `flock active` in the footer after successful initialization; clear it when inactive or initialization fails.
 - Expand Git exclusions for TypeScript builds, caches, coverage, logs, local environment files, editors, and OS metadata.
 - Ignore IDE metadata and package archives in Git; exclude Git, IDE, dependencies, and archives from Docker build contexts.
 

@@ -18,13 +18,20 @@ function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill
     on: (name, handler) => { handlers[name] = handler; },
     exec: (...args) => { calls.push(args); return exec(...args); },
   });
-  const ctx = { hasUI, ui: { notify: (...args) => warnings.push(args) } };
+  const statuses = new Map();
+  const ctx = { hasUI, ui: {
+    notify: (...args) => warnings.push(args),
+    setStatus: (key, text) => {
+      if (text === undefined) statuses.delete(key);
+      else statuses.set(key, text);
+    },
+  } };
   const start = () => handlers.session_start({}, ctx);
   const turn = (sections = {}) => {
-    handlers.before_agent_start({ prompt: "ordinary request", systemPromptOptions: { sections } });
+    handlers.before_agent_start({ prompt: "ordinary request", systemPromptOptions: { sections } }, ctx);
     return sections;
   };
-  return { start, turn, calls, warnings, handlers };
+  return { start, turn, calls, warnings, handlers, statuses };
 }
 
 test("each missing activation variable prevents fetch and removes only owned content", async () => {
@@ -89,6 +96,7 @@ test("new initialization clears success, including while pending and on failure"
   await pending;
   assert.deepEqual(h.turn(), {});
   assert.equal(h.calls.length, 2);
+  assert.equal(h.statuses.size, 0);
 });
 
 test("superseded successful and failed fetches cannot replace cache or warn", async () => {
@@ -117,4 +125,23 @@ test("inactive initialization supersedes an outstanding fetch", async () => {
   await old;
   process.env.HERDR_ENV = "1";
   assert.deepEqual(h.turn(), {});
+});
+
+test("active footer status follows initialization and activation, without UI calls in headless mode", async () => {
+  const h = setup();
+  assert.equal(h.statuses.size, 0);
+  await h.start();
+  assert.equal(h.statuses.get("pi_herdr_flock"), "flock active");
+  h.turn();
+  assert.equal(h.statuses.size, 1);
+  delete process.env.HERDR_ENV;
+  h.turn();
+  assert.equal(h.statuses.size, 0);
+  await h.start();
+  assert.equal(h.statuses.size, 0);
+
+  const headless = setup(undefined, false);
+  await headless.start();
+  headless.turn();
+  assert.equal(headless.statuses.size, 0);
 });

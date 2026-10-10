@@ -28,6 +28,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("session_start", async (_event, ctx) => {
 		const identity = ++initialization;
 		cached = "";
+		if (ctx.hasUI) ctx.ui.setStatus(SECTION, undefined);
 		if (!active()) return;
 
 		try {
@@ -37,6 +38,7 @@ export default function (pi: ExtensionAPI) {
 				throw new Error("herdr --skill did not return usable instructions");
 			}
 			cached = `${result.stdout}\n\n${POLICY}`;
+			if (ctx.hasUI && active()) ctx.ui.setStatus(SECTION, "flock active");
 		} catch {
 			if (identity === initialization && ctx.hasUI) {
 				ctx.ui.notify("pi-herdr-flock: could not load herdr --skill; instructions omitted.", "warning");
@@ -44,7 +46,8 @@ export default function (pi: ExtensionAPI) {
 		}
 	});
 
-	pi.on("before_agent_start", (event) => {
+	pi.on("before_agent_start", (event, ctx) => {
+		if (ctx.hasUI) ctx.ui.setStatus(SECTION, active() && cached ? "flock active" : undefined);
 		if (active() && cached) {
 			event.systemPromptOptions.sections[SECTION] = cached;
 		} else {
