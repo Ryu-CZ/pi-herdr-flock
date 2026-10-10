@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Ignore IDE metadata and package archives in Git; exclude Git, IDE, dependencies, and archives from Docker build contexts.
+
 ## 0.1.0
 
 - Fetch and cache live Herdr instructions at session initialization.
