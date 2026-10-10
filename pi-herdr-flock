@@ -16,7 +16,7 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 | Failure | Leave cache empty; omit the section. Warn once per failed initialization where UI is available; do not crash Pi or inject stale text. |
 | Refresh | Reload/session changes fetch again. Ignore late results from superseded initialization. No periodic refresh or per-turn subprocess. |
 | Outside Herdr | No fetch, injected section, or delegation-policy change. |
-| Status | Show `herdr flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. Clear it when inactive or initialization fails; do not replace the footer. |
+| Status | Show `🐑 flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. Clear it when inactive or initialization fails; do not replace the footer. |
 
 Implementation target: one extension file, cached text, initialization identity, and two hooks. Prefer Pi's structured `systemPromptOptions.sections` over replacing the entire system prompt or adding durable conversation messages. This seam exists in Pi 1.1.0; verify the supported-version contract before implementation.
 

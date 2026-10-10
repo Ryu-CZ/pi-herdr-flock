@@ -22,7 +22,7 @@ Activates only when `HERDR_ENV=1` and both `HERDR_PANE_ID` and `HERDR_SOCKET_PAT
 
 At session start (including reload/session changes), runs `herdr --skill` once with a five-second timeout. Keeps the complete successful stdout in memory and injects it plus delegation guidance into the `pi_herdr_flock` system-prompt section on every agent start. Late results from superseded initialization are ignored.
 
-After successful initialization, the footer shows `herdr flock` through Pi's extension-status API (also supported by `pi-minimal-footer` when extension statuses are enabled). The indicator clears when inactive or initialization fails.
+After successful initialization, the footer shows `🐑 flock` through Pi's extension-status API (also supported by `pi-minimal-footer` when extension statuses are enabled). The indicator clears when inactive or initialization fails.
 
 Override the label with the `PI_HERDR_FLOCK_STATUS` environment variable before launching Pi:
 
