@@ -36,7 +36,7 @@ function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill
     handlers.before_agent_start({ prompt: "ordinary request", systemPromptOptions: { sections } }, ctx);
     return sections;
   };
-  return { start, turn, calls, warnings, handlers, statuses };
+  return { start, turn, calls, warnings, handlers, statuses, ctx };
 }
 
 test("each missing activation variable prevents fetch and removes only owned content", async () => {
@@ -176,4 +176,21 @@ test("active footer status follows initialization and activation, without UI cal
   await headless.start();
   headless.turn();
   assert.equal(headless.statuses.size, 0);
+});
+
+test("shutdown invalidates pending initialization before context becomes stale", async () => {
+  for (const rejected of [false, true]) {
+    let resolve, reject;
+    const h = setup(() => new Promise((r, j) => { resolve = r; reject = j; }));
+    const pending = h.start();
+    h.handlers.session_shutdown?.({ reason: "reload" }, h.ctx);
+    Object.defineProperty(h.ctx, "hasUI", {
+      get: () => assert.fail("superseded initialization accessed stale context"),
+    });
+    if (rejected) reject(new Error("late failure"));
+    else resolve({ code: 0, killed: false, stdout: "obsolete" });
+    await pending;
+    assert.equal(h.warnings.length, 0);
+    assert.equal(h.statuses.size, 0);
+  }
 });

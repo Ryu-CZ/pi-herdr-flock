@@ -47,6 +47,11 @@ export default function (pi: ExtensionAPI) {
 		}
 	});
 
+	pi.on("session_shutdown", () => {
+		++initialization;
+		cached = "";
+	});
+
 	pi.on("before_agent_start", (event, ctx) => {
 		if (ctx.hasUI) ctx.ui.setStatus(SECTION, active() && cached ? statusText() : undefined);
 		if (active() && cached) {

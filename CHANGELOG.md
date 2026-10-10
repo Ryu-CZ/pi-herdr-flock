@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Invalidate pending fetches on session shutdown so late completions cannot access a stale Pi context after reload.
 - Strengthen regression tests for delegation-policy boundaries, zero headless UI calls, and empty status overrides.
 - Show `🐑 flock` in the footer after successful initialization; configure the label with `PI_HERDR_FLOCK_STATUS` and clear it when inactive or initialization fails.
 - Expand Git exclusions for TypeScript builds, caches, coverage, logs, local environment files, editors, and OS metadata.
