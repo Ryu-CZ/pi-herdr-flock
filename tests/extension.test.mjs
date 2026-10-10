@@ -21,12 +21,15 @@ function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill
     exec: (...args) => { calls.push(args); return exec(...args); },
   });
   const statuses = new Map();
-  const ctx = { hasUI, ui: {
+  const ctx = { hasUI, ui: hasUI ? {
     notify: (...args) => warnings.push(args),
     setStatus: (key, text) => {
       if (text === undefined) statuses.delete(key);
       else statuses.set(key, text);
     },
+  } : {
+    notify: () => assert.fail("headless initialization must not notify"),
+    setStatus: () => assert.fail("headless execution must not set status"),
   } };
   const start = () => handlers.session_start({}, ctx);
   const turn = (sections = {}) => {
@@ -59,7 +62,28 @@ test("full output and policy reassert one section across turns and fresh post-co
   assert.deepEqual(h.calls, [["herdr", ["--skill"], { timeout: 5000 }]]);
   const sections = h.turn({ other: "keep" });
   assert.ok(sections.pi_herdr_flock.startsWith(stdout + "\n\n"));
-  assert.match(sections.pi_herdr_flock, /standing request/);
+  for (const clause of [
+    "standing request to use Herdr for otherwise-permitted Pi delegation",
+    "It does not authorize delegation forbidden by the task or unrelated Herdr operations",
+    "Delegate only when useful and permitted",
+    "Define the required expert on demand",
+    "not hidden Agent/SubagentWorkflow mechanisms",
+    "Stay in the caller's workspace and working directory; preserve focus",
+    "Different projects, new workspaces, and worktrees require separate authorization",
+    "bounded task, expertise, context, read/edit scope, verification, completion criteria, and model/thinking choice",
+    "Honor user preferences; hardcode no providers, roles, or escalation tiers",
+    "Use returned surface IDs",
+    "submission is not completion",
+    "Inspect timeouts before retrying to avoid duplicate tasks",
+    "Access failures need an available model, not identical retries",
+    "Parent verifies actual results/diffs and relevant checks",
+    "Avoid concurrent conflicting writes",
+    "Prompt restrictions are not a sandbox",
+    "Close only task-created surfaces after collecting results unless retention was requested",
+    "No silent fallback to hidden workers when Herdr fails",
+    "Other operations retain the live skill's consent and safety requirements",
+    "Later explicit user instructions take precedence",
+  ]) assert.ok(sections.pi_herdr_flock.includes(clause), `missing policy clause: ${clause}`);
   const expected = { ...sections };
   for (let i = 0; i < 3; i++) assert.deepEqual(h.turn(sections), expected);
   assert.equal(h.turn().pi_herdr_flock, expected.pi_herdr_flock);
@@ -138,6 +162,10 @@ test("active footer status follows initialization and activation, without UI cal
   h.turn();
   assert.equal(h.statuses.get("pi_herdr_flock"), "custom flock");
   assert.equal(h.statuses.size, 1);
+  process.env.PI_HERDR_FLOCK_STATUS = "";
+  h.turn();
+  assert.equal(h.statuses.get("pi_herdr_flock"), "");
+  assert.ok(h.turn().pi_herdr_flock, "empty label must not disable instructions");
   delete process.env.HERDR_ENV;
   h.turn();
   assert.equal(h.statuses.size, 0);
