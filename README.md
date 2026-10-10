@@ -11,7 +11,7 @@ Guides Pi to delegate work to a visible flock of Herdr terminals.
 
 ![pi-herdr-flock preview](media/github-preview.png)
 
-Flock loads Herdr's live instructions into Pi and encourages delegation through visible panes in your project. It adds no tools and launches no agents. Outside Herdr, it stays inactive.
+Flock runs `herdr --skill` through Pi's session-start hook and adds the instructions to the system prompt before each agent run. It encourages delegation through visible panes in your project. It adds no tools and launches no agents. Outside Herdr, it stays inactive.
 
 ## Install
 
