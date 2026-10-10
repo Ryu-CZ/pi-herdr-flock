@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Expand Git exclusions for TypeScript builds, caches, coverage, logs, local environment files, editors, and OS metadata.
 - Ignore IDE metadata and package archives in Git; exclude Git, IDE, dependencies, and archives from Docker build contexts.
 
 ## 0.1.0
