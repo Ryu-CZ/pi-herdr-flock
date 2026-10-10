@@ -7,41 +7,21 @@
   <a href="https://pi.dev/packages/pi-herdr-flock"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
 </p>
 
-![pi-herdr-flock preview](media/github-preview.png)
-
 Guides Pi to delegate work to a visible flock of Herdr terminals.
 
-## What it does
+![pi-herdr-flock preview](media/github-preview.png)
 
-- Loads Herdr's current instructions into Pi
-- Encourages visible sibling-pane or project-local delegation
-- Keeps focus, verification, and cleanup explicit
-- Remains inactive outside Herdr
-- Never launches workers automatically
-
-## Best for
-
-- Users running Pi inside Herdr
-- Teams that want visible, auditable worker delegation
-- Workflows where focus preservation and verification matter
-
-## Not for
-
-- Automatic agent spawning
-- Hidden or background workers
-- Running outside Herdr
+Flock loads Herdr's live instructions into Pi and encourages delegation through visible panes in your project. It adds no tools and launches no agents. Outside Herdr, it stays inactive.
 
 ## Install
 
-Requires Pi **1.1.0+ (1.x)**, Node.js **22.19+**, and `herdr` on PATH.
-
-This extension does not create or launch agents. It provides guidance for using visible Herdr workers through Herdr.
+Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH.
 
 ```sh
 pi install npm:pi-herdr-flock
 ```
 
-Run Pi inside Herdr, then use `/reload` if Pi was already running. Outside Herdr, the extension stays inactive.
+Run Pi inside Herdr. If Pi was already running, use `/reload`.
 
 ## Status
 
@@ -55,13 +35,15 @@ PI_HERDR_FLOCK_STATUS="my flock" pi
 
 An empty value hides the label without disabling the extension.
 
-If instructions cannot load, Pi warns when UI is available and leaves Flock inactive. Check that `herdr --skill` works, then `/reload`. Reload also picks up updated Herdr instructions.
+If instructions cannot load, Pi shows a warning when a UI is available and leaves Flock inactive. Check that `herdr --skill` works, then use `/reload`.
+
+Reload also picks up updated Herdr instructions.
 
 ## Delegation limits
 
-Enabling Flock expresses a preference for otherwise-permitted delegation through visible sibling panes or project-local tabs. Explicit no-delegation instructions still apply; other projects, worktrees, and unrelated Herdr operations need separate authorization. No hidden-worker fallback is authorized.
+Flock provides guidance, not enforcement. Your restrictions still apply. Work in other projects or worktrees, and unrelated Herdr operations, require permission. Hidden workers are not a fallback.
 
-Worker selection, focus preservation, verification, and cleanup are model guidance—not enforced guarantees. Instructions consume context tokens, and separately loaded Herdr skills may duplicate them.
+Instructions consume context tokens. Loading a separate Herdr skill may duplicate them.
 
 ## Development
 
