@@ -35,7 +35,7 @@
     "CHANGELOG.md",
     "LICENSE",
     "media/",
-    "pi-herdr-flock"
+    "VISION.md"
   ],
   "engines": {
     "node": ">=22.19.0"

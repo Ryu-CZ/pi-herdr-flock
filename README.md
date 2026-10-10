@@ -56,6 +56,6 @@ npm pack --dry-run
 
 Try this checkout without installing: `pi -e ./extensions/index.ts`.
 
-See [the technical vision](./pi-herdr-flock) for runtime contracts, delegation policy, and verification coverage.
+See [the technical vision](./VISION.md) for runtime contracts, delegation policy, and verification coverage.
 
 MIT licensed.

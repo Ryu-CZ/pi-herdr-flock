@@ -16,13 +16,15 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 | Failure | Leave cache empty; omit the section. Warn once per failed initialization where UI is available; do not crash Pi or inject stale text. |
 | Refresh | Reload/session changes fetch again. Ignore late results from superseded initialization, including after runtime teardown. No periodic refresh or per-turn subprocess. |
 | Outside Herdr | No fetch, injected section, or delegation-policy change. |
-| Status | Show `🐑 flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. Clear it when inactive or initialization fails; do not replace the footer. |
+| Status | Show `🐑 flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. An empty override hides the label. Clear it when inactive or initialization fails; do not replace the footer. |
 
-Implementation target: one extension file, cached text, initialization identity, and three hooks (initialization, teardown invalidation, and prompt injection). Prefer Pi's structured `systemPromptOptions.sections` over replacing the entire system prompt or adding durable conversation messages. This seam exists in Pi 1.1.0; verify the supported-version contract before implementation.
+The implementation uses one extension file, an in-memory cache, an initialization identity, and three hooks: `session_start`, `session_shutdown`, and `before_agent_start`. It modifies Pi's structured `systemPromptOptions.sections` rather than replacing the entire system prompt or adding conversation messages.
+
+Pi 1.1.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x).
 
 Use the stable section key `pi_herdr_flock`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
 
-Herdr 0.9.3 currently returns approximately 14 KB. Caching saves process launches, **not context tokens**. Installed-binary changes take effect at the next initialization, not mid-session.
+Caching saves process launches, **not context tokens**. Installed-binary changes take effect at the next initialization, not mid-session.
 
 ## Delegation policy appendix
 
@@ -69,9 +71,13 @@ Deduplication covers this extension's own section only; independently loaded cop
 
 ### Current verification coverage
 
-`npm test` covers mocked hooks and Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Fetch results are controlled; complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
+`npm test` covers mocked hooks and Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch.
 
-The extension's cache is memory-only and it performs no direct filesystem writes or custom conversation-message injection. Pi may persist injected system-prompt sections in session history. Another extension's full-prompt override can hide structured sections from the provider; Flock does not override that behavior. Herdr's managed lifecycle integration remains unchanged.
+Fetch results are controlled. Complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
+
+The extension's cache is memory-only and it performs no direct filesystem writes or custom conversation-message injection. Pi may persist injected system-prompt sections in session history.
+
+Another extension's full-prompt override can hide structured sections from the provider; Flock does not override that behavior. Herdr's managed lifecycle integration remains unchanged.
 
 **Behavioral scenarios—not hard guarantees**
 
