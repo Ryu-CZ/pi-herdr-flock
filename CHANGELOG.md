@@ -1,11 +1,8 @@
 # Changelog
 
-## Unreleased
-
-- Tighten the user-facing README and move implementation/verification details into the technical vision.
-
 ## [0.2.0](https://github.com/Ryu-CZ/pi-herdr-flock/releases/tag/v0.2.0)
 
+- Tighten the user-facing README and move implementation/verification details into the technical vision.
 - Add Pi 1.1.0 runtime integration tests for prompt coexistence, compaction retention/deduplication, inactive removal, reload teardown races, and session-start refresh dispatch.
 - Invalidate pending fetches on session shutdown so late completions cannot access a stale Pi context after reload.
 - Strengthen regression tests for delegation-policy boundaries, zero headless UI calls, and empty status overrides.
