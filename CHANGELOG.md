@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Show `flock active` in the footer after successful initialization; clear it when inactive or initialization fails.
+- Show `herdr flock` in the footer after successful initialization; configure the label with `PI_HERDR_FLOCK_STATUS` and clear it when inactive or initialization fails.
 - Expand Git exclusions for TypeScript builds, caches, coverage, logs, local environment files, editors, and OS metadata.
 - Ignore IDE metadata and package archives in Git; exclude Git, IDE, dependencies, and archives from Docker build contexts.
 

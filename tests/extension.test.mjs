@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import extension from "../extensions/index.ts";
 
-const keys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH"];
+const activationKeys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH"];
+const keys = [...activationKeys, "PI_HERDR_FLOCK_STATUS"];
 const original = keys.map(key => process.env[key]);
 afterEach(() => keys.forEach((key, i) => {
   if (original[i] === undefined) delete process.env[key];
@@ -11,6 +12,7 @@ afterEach(() => keys.forEach((key, i) => {
 
 function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill" }), hasUI = true) {
   Object.assign(process.env, { HERDR_ENV: "1", HERDR_PANE_ID: "caller", HERDR_SOCKET_PATH: "/socket" });
+  delete process.env.PI_HERDR_FLOCK_STATUS;
   const handlers = {};
   const calls = [];
   const warnings = [];
@@ -35,7 +37,7 @@ function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill
 }
 
 test("each missing activation variable prevents fetch and removes only owned content", async () => {
-  for (const key of keys) {
+  for (const key of activationKeys) {
     const h = setup();
     delete process.env[key];
     await h.start();
@@ -131,8 +133,10 @@ test("active footer status follows initialization and activation, without UI cal
   const h = setup();
   assert.equal(h.statuses.size, 0);
   await h.start();
-  assert.equal(h.statuses.get("pi_herdr_flock"), "flock active");
+  assert.equal(h.statuses.get("pi_herdr_flock"), "herdr flock");
+  process.env.PI_HERDR_FLOCK_STATUS = "custom flock";
   h.turn();
+  assert.equal(h.statuses.get("pi_herdr_flock"), "custom flock");
   assert.equal(h.statuses.size, 1);
   delete process.env.HERDR_ENV;
   h.turn();

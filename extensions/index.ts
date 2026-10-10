@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const SECTION = "pi_herdr_flock";
+const statusText = () => process.env.PI_HERDR_FLOCK_STATUS ?? "herdr flock";
 const POLICY = `## Pi Herdr Flock — local delegation preference
 
 This enabled extension expresses the user's standing request to use Herdr for otherwise-permitted Pi delegation. For worker execution only, that satisfies the CLI skill's explicit-Herdr-request requirement and permits project-local sibling panes or tabs. It does not authorize delegation forbidden by the task or unrelated Herdr operations.
@@ -38,7 +39,7 @@ export default function (pi: ExtensionAPI) {
 				throw new Error("herdr --skill did not return usable instructions");
 			}
 			cached = `${result.stdout}\n\n${POLICY}`;
-			if (ctx.hasUI && active()) ctx.ui.setStatus(SECTION, "flock active");
+			if (ctx.hasUI && active()) ctx.ui.setStatus(SECTION, statusText());
 		} catch {
 			if (identity === initialization && ctx.hasUI) {
 				ctx.ui.notify("pi-herdr-flock: could not load herdr --skill; instructions omitted.", "warning");
@@ -47,7 +48,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("before_agent_start", (event, ctx) => {
-		if (ctx.hasUI) ctx.ui.setStatus(SECTION, active() && cached ? "flock active" : undefined);
+		if (ctx.hasUI) ctx.ui.setStatus(SECTION, active() && cached ? statusText() : undefined);
 		if (active() && cached) {
 			event.systemPromptOptions.sections[SECTION] = cached;
 		} else {
