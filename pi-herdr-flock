@@ -1,4 +1,4 @@
-# Pi Herdr Workstyle — Technical Vision
+# Pi Herdr Flock — Technical Vision
 
 ## Scope
 
@@ -20,7 +20,7 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 
 Implementation target: one extension file, cached text, initialization identity, and three hooks (initialization, teardown invalidation, and prompt injection). Prefer Pi's structured `systemPromptOptions.sections` over replacing the entire system prompt or adding durable conversation messages. This seam exists in Pi 1.1.0; verify the supported-version contract before implementation.
 
-Use a stable section key, e.g. `pi_herdr_workstyle`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
+Use the stable section key `pi_herdr_flock`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
 
 Herdr 0.9.3 currently returns approximately 14 KB. Caching saves process launches, **not context tokens**. Installed-binary changes take effect at the next initialization, not mid-session.
 
@@ -66,6 +66,12 @@ Deduplication covers this extension's own section only; independently loaded cop
 | Failed initialization after success | Previous cached instructions not retained. |
 | Compaction and continuation | Verify the prompt seam reasserts one section on subsequent starts. |
 | Coexisting extensions | Other prompt sections remain intact; no full-prompt replacement. |
+
+### Current verification coverage
+
+`npm test` covers mocked hooks and Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Fetch results are controlled; complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
+
+The extension's cache is memory-only and it performs no direct filesystem writes or custom conversation-message injection. Pi may persist injected system-prompt sections in session history. Another extension's full-prompt override can hide structured sections from the provider; Flock does not override that behavior. Herdr's managed lifecycle integration remains unchanged.
 
 **Behavioral scenarios—not hard guarantees**
 
