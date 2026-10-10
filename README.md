@@ -47,6 +47,6 @@ npm run check
 npm pack --dry-run
 ```
 
-Tests exercise mocked extension hooks; real Herdr worker behavior and interactive compaction/reload remain manual integration checks. See [the technical vision](./pi-herdr-flock) for scope and acceptance criteria.
+Tests cover mocked hooks plus Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Fetch results are controlled; complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks. See [the technical vision](./pi-herdr-flock) for scope and acceptance criteria.
 
 MIT licensed.
