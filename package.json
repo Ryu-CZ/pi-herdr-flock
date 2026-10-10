@@ -1,0 +1,25 @@
+{
+  "name": "pi-herdr-flock",
+  "version": "0.1.0",
+  "description": "Live Herdr instructions and visible-worker delegation guidance for Pi inside Herdr.",
+  "type": "module",
+  "keywords": ["pi-package", "pi-extension", "pi", "herdr", "delegation"],
+  "homepage": "https://github.com/Ryu-CZ/pi-herdr-flock#readme",
+  "bugs": { "url": "https://github.com/Ryu-CZ/pi-herdr-flock/issues" },
+  "repository": { "type": "git", "url": "git+https://github.com/Ryu-CZ/pi-herdr-flock.git" },
+  "license": "MIT",
+  "author": "Tom Trval (https://github.com/Ryu-CZ)",
+  "files": ["extensions/", "README.md", "CHANGELOG.md", "LICENSE", "pi-herdr-flock"],
+  "engines": { "node": ">=22.19.0" },
+  "scripts": {
+    "test": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs",
+    "check": "tsc --noEmit"
+  },
+  "peerDependencies": { "@earendil-works/pi-coding-agent": ">=1.1.0 <2" },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "1.1.0",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  },
+  "pi": { "extensions": ["./extensions/index.ts"] }
+}
