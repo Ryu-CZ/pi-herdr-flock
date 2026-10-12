@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Capitalize the default footer label to `🐑 Flock`
+- Simplify the README for users; keep development and design details in `VISION.md`
+
+### Fixed
+
+- Fix missing Herdr instructions and delegation guidance when another extension has already replaced Pi's system prompt
+
 ## [0.2.1] - 2026-10-10
 
 ### Added

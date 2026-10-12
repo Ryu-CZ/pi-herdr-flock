@@ -9,7 +9,7 @@ const { createEventBus } = await import(new URL("event-bus.js", core));
 const { createExtensionRuntime, loadExtensionFromFactory } = await import(new URL("extensions/loader.js", core));
 const { ExtensionRunner, emitSessionShutdownEvent } = await import(new URL("extensions/runner.js", core));
 const { SessionManager } = await import(new URL("session-manager.js", core));
-const { buildSystemPromptSections, diffSystemPromptSections } = await import(new URL("system-prompt.js", core));
+const { buildSystemPromptSections, buildSystemPromptState, diffSystemPromptSections } = await import(new URL("system-prompt.js", core));
 
 const keys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH", "PI_HERDR_FLOCK_STATUS"];
 const original = keys.map(key => process.env[key]);
@@ -47,8 +47,8 @@ async function harness(exec, companion = false) {
     notify: (...args) => warnings.push(args),
   }, "tui");
   const start = reason => runner.emit({ type: "session_start", reason });
-  const turn = () => runner.emitBeforeAgentStart("ordinary request", undefined, {
-    cwd: process.cwd(), sections: { unrelated: "keep" },
+  const turn = (forceSystemPrompt) => runner.emitBeforeAgentStart("ordinary request", undefined, {
+    cwd: process.cwd(), sections: { unrelated: "keep" }, forceSystemPrompt,
   });
   return { runner, manager, errors, warnings, statuses, start, turn };
 }
@@ -89,6 +89,24 @@ test("real Pi prompt dispatch coexists with another extension and survives compa
   assert.deepEqual(h.errors, []);
 });
 
+test("forced prompts receive the live skill and policy in model-visible text", async () => {
+  const h = await harness(async () => success("live Herdr skill"));
+  await h.start("startup");
+  for (let i = 0; i < 3; i++) {
+    const turn = await h.turn("another extension's forced prompt");
+    const state = buildSystemPromptState(turn.systemPromptOptions);
+    assert.ok(state.content.startsWith("another extension's forced prompt\n\n<pi_herdr_flock>\n"));
+    assert.ok(state.content.includes("live Herdr skill"));
+    assert.ok(state.content.includes("## Pi Herdr Flock — local delegation preference"));
+    assert.equal(state.content.match(/<pi_herdr_flock>/g).length, 1);
+    assert.ok(turn.systemPromptOptions.sections.pi_herdr_flock.includes("live Herdr skill"));
+  }
+  delete process.env.HERDR_ENV;
+  const inactive = await h.turn("another extension's forced prompt");
+  assert.equal(buildSystemPromptState(inactive.systemPromptOptions).content, "another extension's forced prompt");
+  assert.deepEqual(h.errors, []);
+});
+
 test("real guarded Pi contexts ignore both late outcomes after reload teardown", async () => {
   for (const rejected of [false, true]) {
     let resolve, reject;
@@ -104,7 +122,7 @@ test("real guarded Pi contexts ignore both late outcomes after reload teardown",
     assert.deepEqual(old.warnings, []);
     const next = await latest.turn();
     assert.ok(next.systemPromptOptions.sections.pi_herdr_flock.startsWith("latest\n\n"));
-    assert.equal(latest.statuses.get("pi_herdr_flock"), "🐑 flock");
+    assert.equal(latest.statuses.get("pi_herdr_flock"), "🐑 Flock");
     assert.deepEqual(latest.errors, []);
   }
 });

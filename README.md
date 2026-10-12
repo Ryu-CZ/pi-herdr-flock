@@ -11,7 +11,7 @@ Guides Pi to delegate work to a visible flock of Herdr terminals.
 
 ![pi-herdr-flock preview](media/github-preview.png)
 
-Flock runs `herdr --skill` through Pi's session-start hook and adds the instructions to the system prompt before each agent run. It encourages delegation through visible panes in your project. It adds no tools and launches no agents. Outside Herdr, it stays inactive.
+Flock automatically gives Pi the installed Herdr instructions and encourages delegation through visible panes in your project. It does not launch agents itself. Outside Herdr, it stays inactive.
 
 ## Install
 
@@ -25,7 +25,7 @@ Run Pi inside Herdr. If Pi was already running, use `/reload`.
 
 ## Status
 
-The footer shows `🐑 flock` when instructions have loaded successfully. Compatible with `pi-minimal-footer` when extension statuses are enabled.
+The footer shows `🐑 Flock` when instructions have loaded successfully. Compatible with `pi-minimal-footer` when extension statuses are enabled.
 
 Customize the label before launching Pi:
 
@@ -45,17 +45,6 @@ Flock provides guidance, not enforcement. Your restrictions still apply. Work in
 
 Instructions consume context tokens. Loading a separate Herdr skill may duplicate them.
 
-## Development
-
-```sh
-npm ci
-npm test
-npm run check
-npm pack --dry-run
-```
-
-Try this checkout without installing: `pi -e ./extensions/index.ts`.
-
-See [the technical vision](./VISION.md) for runtime contracts, delegation policy, and verification coverage.
+See [the technical vision](./VISION.md) for development and design details.
 
 MIT licensed.

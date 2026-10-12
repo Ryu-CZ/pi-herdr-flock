@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const SECTION = "pi_herdr_flock";
-const statusText = () => process.env.PI_HERDR_FLOCK_STATUS ?? "🐑 flock";
+const statusText = () => process.env.PI_HERDR_FLOCK_STATUS ?? "🐑 Flock";
 const POLICY = `## Pi Herdr Flock — local delegation preference
 
 This enabled extension expresses the user's standing request to use Herdr for otherwise-permitted Pi delegation. For worker execution only, that satisfies the CLI skill's explicit-Herdr-request requirement and permits project-local sibling panes or tabs. It does not authorize delegation forbidden by the task or unrelated Herdr operations.
@@ -56,6 +56,10 @@ export default function (pi: ExtensionAPI) {
 		if (ctx.hasUI) ctx.ui.setStatus(SECTION, active() && cached ? statusText() : undefined);
 		if (active() && cached) {
 			event.systemPromptOptions.sections[SECTION] = cached;
+			// A forced prompt bypasses structured sections in Pi's prompt builder.
+			if (event.systemPromptOptions.forceSystemPrompt !== undefined) {
+				return { systemPrompt: `${event.systemPrompt}\n\n<${SECTION}>\n${cached}\n</${SECTION}>` };
+			}
 		} else {
 			delete event.systemPromptOptions.sections[SECTION];
 		}

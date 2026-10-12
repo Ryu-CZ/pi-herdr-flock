@@ -157,7 +157,7 @@ test("active footer status follows initialization and activation, without UI cal
   const h = setup();
   assert.equal(h.statuses.size, 0);
   await h.start();
-  assert.equal(h.statuses.get("pi_herdr_flock"), "🐑 flock");
+  assert.equal(h.statuses.get("pi_herdr_flock"), "🐑 Flock");
   process.env.PI_HERDR_FLOCK_STATUS = "custom flock";
   h.turn();
   assert.equal(h.statuses.get("pi_herdr_flock"), "custom flock");

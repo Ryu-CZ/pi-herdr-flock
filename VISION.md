@@ -12,13 +12,13 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 | Fetch | On `session_start`, clear cached text; call `pi.exec("herdr", ["--skill"], { timeout: 5000 })` once when active. |
 | Validation | Accept only `code === 0`, not killed, and nonempty stdout. Preserve complete instruction text; no silent truncation. |
 | Storage | In-memory cache only. No bundled fallback, generated file, skill registration, or filesystem writes. |
-| Injection | On every `before_agent_start` inside Herdr, assign cached text + policy to one namespaced prompt section. No prompt-keyword gate. |
+| Injection | Before the first and every subsequent agent run inside Herdr, assign cached text + policy to the `pi_herdr_flock` prompt section. If `forceSystemPrompt` is already set, also return the current prompt with an explicit `<pi_herdr_flock>` appendix so the model receives the instructions. No prompt-keyword gate. |
 | Failure | Leave cache empty; omit the section. Warn once per failed initialization where UI is available; do not crash Pi or inject stale text. |
 | Refresh | Reload/session changes fetch again. Ignore late results from superseded initialization, including after runtime teardown. No periodic refresh or per-turn subprocess. |
 | Outside Herdr | No fetch, injected section, or delegation-policy change. |
-| Status | Show `🐑 flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. An empty override hides the label. Clear it when inactive or initialization fails; do not replace the footer. |
+| Status | Show `🐑 Flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. An empty override hides the label. Clear it when inactive or initialization fails; do not replace the footer. |
 
-The implementation uses one extension file, an in-memory cache, an initialization identity, and three hooks: `session_start`, `session_shutdown`, and `before_agent_start`. It modifies Pi's structured `systemPromptOptions.sections` rather than replacing the entire system prompt or adding conversation messages.
+The implementation uses one extension file, an in-memory cache, an initialization identity, and three hooks: `session_start`, `session_shutdown`, and `before_agent_start`. It normally modifies Pi's structured `systemPromptOptions.sections`, without adding conversation messages. Pi ignores those sections when `forceSystemPrompt` is set, so in that case the hook also returns a `systemPrompt` override preserving the current prompt and appending the labeled instructions.
 
 Pi 1.1.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x).
 
@@ -54,6 +54,17 @@ This appendix is an explicit local policy exception for worker transport and pro
 
 Deduplication covers this extension's own section only; independently loaded copies of Herdr instructions may still coexist.
 
+## Development
+
+```sh
+npm ci
+npm test
+npm run check
+npm pack --dry-run
+```
+
+Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loading the installed package alongside the checkout when testing injection.
+
 ## Verification
 
 **Deterministic extension tests**
@@ -67,17 +78,17 @@ Deduplication covers this extension's own section only; independently loaded cop
 | Reload/session change | Fresh fetch; older pending result cannot replace current cache. |
 | Failed initialization after success | Previous cached instructions not retained. |
 | Compaction and continuation | Verify the prompt seam reasserts one section on subsequent starts. |
-| Coexisting extensions | Other prompt sections remain intact; no full-prompt replacement. |
+| Coexisting extensions | Normal structured composition preserves other sections. An existing forced prompt is preserved with Flock appended to model-visible text. |
 
 ### Current verification coverage
 
-`npm test` covers mocked hooks and Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch.
+`npm test` covers mocked hooks and Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
 
 Fetch results are controlled. Complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
 
 The extension's cache is memory-only and it performs no direct filesystem writes or custom conversation-message injection. Pi may persist injected system-prompt sections in session history.
 
-Another extension's full-prompt override can hide structured sections from the provider; Flock does not override that behavior. Herdr's managed lifecycle integration remains unchanged.
+Flock handles full-prompt overrides already present when its hook runs; a later extension can still replace the prompt and hide the appendix. Saved section metadata or a footer status alone is not proof that the provider received the instructions. Live provider delivery remains a manual integration check. Herdr's managed lifecycle integration remains unchanged.
 
 **Behavioral scenarios—not hard guarantees**
 
