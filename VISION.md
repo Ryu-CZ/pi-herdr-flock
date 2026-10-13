@@ -20,7 +20,7 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 
 The implementation uses one extension file, an in-memory cache, an initialization identity, and three hooks: `session_start`, `session_shutdown`, and `before_agent_start`. It normally modifies Pi's structured `systemPromptOptions.sections`, without adding conversation messages. Pi ignores those sections when `forceSystemPrompt` is set, so in that case the hook also returns a `systemPrompt` override preserving the current prompt and appending the labeled instructions.
 
-Pi 1.1.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x).
+Pi 1.2.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x). Earlier tests covered Pi 1.1.0; the current suite runs only against the pinned Pi 1.2.0 dependency, not both versions.
 
 Use the stable section key `pi_herdr_flock`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
 
@@ -82,9 +82,11 @@ Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loadi
 
 ### Current verification coverage
 
-`npm test` covers mocked hooks and Pi 1.1.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
+The integration harness uses Pi 1.2.0's `emitBeforeAgentStart(trigger, systemPromptOptions)` signature. User triggers supply `messageType: "user"`, `prompt`, and `images`; custom triggers supply `messageType: "custom"` and `message`. The extension only uses fields shared by both event variants, so the compatibility update changes the harness and development dependency without changing runtime behavior.
 
-Fetch results are controlled. Complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
+`npm test` covers mocked hooks and Pi 1.2.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible skill and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
+
+Fetch results are controlled, and triggers are dispatched directly through the extension runner. End-to-end runs initiated by another extension, complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
 
 The extension's cache is memory-only and it performs no direct filesystem writes or custom conversation-message injection. Pi may persist injected system-prompt sections in session history.
 

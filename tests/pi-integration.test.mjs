@@ -47,7 +47,7 @@ async function harness(exec, companion = false) {
     notify: (...args) => warnings.push(args),
   }, "tui");
   const start = reason => runner.emit({ type: "session_start", reason });
-  const turn = (forceSystemPrompt) => runner.emitBeforeAgentStart("ordinary request", undefined, {
+  const turn = (forceSystemPrompt) => runner.emitBeforeAgentStart({ messageType: "user", prompt: "ordinary request", images: undefined }, {
     cwd: process.cwd(), sections: { unrelated: "keep" }, forceSystemPrompt,
   });
   return { runner, manager, errors, warnings, statuses, start, turn };
@@ -143,5 +143,40 @@ test("Pi session-transition start reasons refresh cached instructions and clear 
   }
   assert.equal(calls, 4);
   assert.equal(h.warnings.length, 1);
+  assert.deepEqual(h.errors, []);
+});
+
+test("Pi 1.2 custom-message starts retain Flock policy without prompt or images", async () => {
+  const h = await harness(async () => success("live custom-run skill"), true);
+  await h.start("startup");
+  const trigger = { messageType: "custom", message: {
+    role: "custom", customType: "test", content: "start a run", display: false, timestamp: 1,
+  } };
+  for (const forceSystemPrompt of [undefined, "forced custom prompt"]) {
+    const result = await h.runner.emitBeforeAgentStart(trigger, {
+      cwd: process.cwd(), sections: { unrelated: "keep" }, forceSystemPrompt,
+    });
+    const state = buildSystemPromptState(result.systemPromptOptions);
+    assert.ok(result.systemPromptOptions.sections.pi_herdr_flock.includes("live custom-run skill"));
+    assert.equal(result.systemPromptOptions.sections.unrelated, "keep");
+    assert.equal(result.systemPromptOptions.sections.companion, "another extension");
+    const rendered = forceSystemPrompt === undefined ? state.sections.pi_herdr_flock : state.content;
+    assert.ok(rendered.includes("live custom-run skill"));
+    assert.ok(rendered.includes("## Pi Herdr Flock — local delegation preference"));
+    assert.equal(rendered.match(/<pi_herdr_flock>/g).length, 1);
+    if (forceSystemPrompt !== undefined) {
+      assert.ok(state.content.startsWith(`${forceSystemPrompt}\n\n<pi_herdr_flock>\n`));
+    }
+    assert.deepEqual(result.messages, []);
+    assert.equal(h.statuses.get("pi_herdr_flock"), "🐑 Flock");
+    assert.deepEqual(h.errors, []);
+  }
+  delete process.env.HERDR_ENV;
+  const inactive = await h.runner.emitBeforeAgentStart(trigger, {
+    cwd: process.cwd(), sections: { pi_herdr_flock: "stale", unrelated: "keep" },
+  });
+  assert.equal(inactive.systemPromptOptions.sections.pi_herdr_flock, undefined);
+  assert.equal(inactive.systemPromptOptions.sections.unrelated, "keep");
+  assert.equal(h.statuses.size, 0);
   assert.deepEqual(h.errors, []);
 });

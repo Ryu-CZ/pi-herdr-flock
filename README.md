@@ -11,11 +11,11 @@ Guides Pi to delegate work to a visible flock of Herdr terminals.
 
 ![pi-herdr-flock preview](media/github-preview.png)
 
-Flock automatically gives Pi the installed Herdr instructions and encourages delegation through visible panes in your project. It does not launch agents itself. Outside Herdr, it stays inactive.
+Flock loads `herdr --skill` at session start and gives Pi guidance for delegating through visible panes in your project. It launches no agents and stays inactive outside Herdr.
 
 ## Install
 
-Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH.
+Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Integration tests run against Pi **1.2.0**.
 
 ```sh
 pi install npm:pi-herdr-flock
@@ -35,9 +35,7 @@ PI_HERDR_FLOCK_STATUS="my flock" pi
 
 An empty value hides the label without disabling the extension.
 
-If instructions cannot load, Pi shows a warning when a UI is available and leaves Flock inactive. Check that `herdr --skill` works, then use `/reload`.
-
-Reload also picks up updated Herdr instructions.
+If loading fails, Flock stays inactive and Pi shows a warning when a UI is available. Check `herdr --skill`, then use `/reload`. Reload also picks up updated Herdr instructions.
 
 ## Delegation limits
 

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Verify Pi 1.2.0 compatibility with expanded regression coverage, including runs started by other extensions
+- Update the integration harness for Pi 1.2.0 and verify user and custom-message starts, including skill and policy injection, forced-prompt preservation, and inactive cleanup
+- Clarify compatibility and verification limits in the README and technical vision; runtime behavior is unchanged
 
 ## [0.2.2] - 2026-10-12
 
