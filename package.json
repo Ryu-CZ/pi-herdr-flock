@@ -34,7 +34,6 @@
     "README.md",
     "CHANGELOG.md",
     "LICENSE",
-    "media/",
     "VISION.md"
   ],
   "engines": {

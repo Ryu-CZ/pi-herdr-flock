@@ -9,7 +9,7 @@
 
 Guides Pi to delegate work to a visible flock of Herdr terminals.
 
-[![Watch the pi-herdr-flock demo](media/readme-preview.gif)](https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/pi-preview.mp4)
+[![Watch the pi-herdr-flock demo](https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/readme-preview.gif)](https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/pi-preview.mp4)
 
 [Watch the full-speed demo](https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/pi-preview.mp4): Pi delegates to two visible workers, each launches a child, and all four worker panes close after results are collected. The animated preview runs at 2.5× speed.
 
