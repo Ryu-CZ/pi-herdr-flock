@@ -9,7 +9,9 @@
 
 Guides Pi to delegate work to a visible flock of Herdr terminals.
 
-![pi-herdr-flock preview](media/github-preview.png)
+[![Watch the pi-herdr-flock demo](media/readme-preview.gif)](https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/pi-preview.mp4)
+
+[Watch the full-speed demo](https://raw.githubusercontent.com/Ryu-CZ/pi-herdr-flock/main/media/pi-preview.mp4): Pi delegates to two visible workers, each launches a child, and all four worker panes close after results are collected. The animated preview runs at 2.5× speed.
 
 Flock loads `herdr --skill` at session start and gives Pi guidance for delegating through visible panes in your project. It launches no agents and stays inactive outside Herdr.
 
