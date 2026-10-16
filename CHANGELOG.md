@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-10-16
+
 ### Changed
 
 - Shorten Flock's delegation instructions and leave worker setup and cleanup guidance to Herdr
@@ -75,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keep complete Herdr instructions and ignore outdated instruction loads after session changes
 - Document installation and usage
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.0...v0.2.1

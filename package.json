@@ -1,6 +1,6 @@
 {
   "name": "pi-herdr-flock",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Guides Pi to delegate work to a visible flock of Herdr terminals.",
   "type": "module",
   "keywords": [
