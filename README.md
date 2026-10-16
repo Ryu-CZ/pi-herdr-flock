@@ -16,11 +16,11 @@ Guides Pi to delegate work to a visible flock of Herdr terminals.
   and all four worker panes close after results are collected.
 </p>
 
-Flock loads `herdr --skill` at session start and gives Pi guidance for delegating through visible panes in your project. It launches no agents and stays inactive outside Herdr.
+Flock loads `herdr --skill` at session start and tells Pi to prefer visible Herdr workers when delegation is useful. It does not launch workers itself and stays inactive outside Herdr.
 
 ## Install
 
-Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Integration tests run against Pi **1.2.0**.
+Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Integration tests run against Pi **1.3.0**.
 
 ```sh
 pi install npm:pi-herdr-flock
@@ -48,7 +48,7 @@ Flock guides how Pi delegates; it is **not a sandbox or a technical security bou
 
 - **You stay in control.** Pi must still follow instructions like “don't delegate” or “don't edit files.”
 - **Workers stay local by default.** Flock tells Pi to start workers in your current project and Herdr workspace.
-- **Pi is told to ask before going beyond that.** This includes other projects, Git worktrees, and Herdr actions unrelated to delegation. This is Flock's guidance—not a permission check enforced by Pi.
+- **Herdr's own rules still apply.** Flock adds no extra approval requirements for other projects or Git worktrees.
 - **No hidden workers.** If Herdr cannot run a visible worker, Pi should tell you—not quietly use a hidden one.
 
 Flock's instructions also use part of the model's context window. Loading a separate Herdr skill can duplicate those instructions and consume extra context tokens.

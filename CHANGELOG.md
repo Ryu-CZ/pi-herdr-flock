@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Shorten Flock's delegation instructions and leave worker setup and cleanup guidance to Herdr
+- Remove an internal instruction to ask for extra approval before using other projects or Git worktrees. No features are removed. Herdr's rules and your instructions still apply
+- Make the README clearer about what Flock does and does not control
+- Update the documented tested Pi version to 1.3.0
+
 ## [0.2.3] - 2026-10-14
 
 ### Added

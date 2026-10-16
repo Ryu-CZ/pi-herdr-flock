@@ -146,7 +146,7 @@ test("Pi session-transition start reasons refresh cached instructions and clear 
   assert.deepEqual(h.errors, []);
 });
 
-test("Pi 1.2 custom-message starts retain Flock policy without prompt or images", async () => {
+test("Pi 1.3 custom-message starts retain Flock policy without prompt or images", async () => {
   const h = await harness(async () => success("live custom-run skill"), true);
   await h.start("startup");
   const trigger = { messageType: "custom", message: {

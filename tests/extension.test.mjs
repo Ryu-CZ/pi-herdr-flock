@@ -63,27 +63,18 @@ test("full output and policy reassert one section across turns and fresh post-co
   const sections = h.turn({ other: "keep" });
   assert.ok(sections.pi_herdr_flock.startsWith(stdout + "\n\n"));
   for (const clause of [
-    "standing request to use Herdr for otherwise-permitted Pi delegation",
-    "It does not authorize delegation forbidden by the task or unrelated Herdr operations",
-    "Delegate only when useful and permitted",
-    "Define the required expert on demand",
-    "not hidden Agent/SubagentWorkflow mechanisms",
-    "Stay in the caller's workspace and working directory; preserve focus",
-    "Different projects, new workspaces, and worktrees require separate authorization",
-    "bounded task, expertise, context, read/edit scope, verification, completion criteria, and model/thinking choice",
-    "Honor user preferences; hardcode no providers, roles, or escalation tiers",
-    "Use returned surface IDs",
-    "submission is not completion",
-    "Inspect timeouts before retrying to avoid duplicate tasks",
-    "Access failures need an available model, not identical retries",
-    "Parent verifies actual results/diffs and relevant checks",
-    "Avoid concurrent conflicting writes",
-    "Prompt restrictions are not a sandbox",
-    "Close only task-created surfaces after collecting results unless retention was requested",
-    "No silent fallback to hidden workers when Herdr fails",
-    "Other operations retain the live skill's consent and safety requirements",
-    "Later explicit user instructions take precedence",
+    "standing request to prefer visible Pi workers through Herdr",
+    "when delegation is useful and permitted",
+    "Flock does not launch workers itself",
+    "Follow the user's instructions",
+    "Default to the current project and Herdr workspace",
+    "preserve the user's focus",
+    "Follow the live Herdr skill",
+    "Honor requested models and thinking levels",
+    "do not silently fall back to hidden workers",
+    "Herdr's own safety and permission rules still apply",
   ]) assert.ok(sections.pi_herdr_flock.includes(clause), `missing policy clause: ${clause}`);
+  assert.ok(!sections.pi_herdr_flock.includes("require separate authorization"));
   const expected = { ...sections };
   for (let i = 0; i < 3; i++) assert.deepEqual(h.turn(sections), expected);
   assert.equal(h.turn().pi_herdr_flock, expected.pi_herdr_flock);

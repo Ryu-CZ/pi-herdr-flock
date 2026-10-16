@@ -4,17 +4,14 @@ const SECTION = "pi_herdr_flock";
 const statusText = () => process.env.PI_HERDR_FLOCK_STATUS ?? "🐑 Flock";
 const POLICY = `## Pi Herdr Flock — local delegation preference
 
-This enabled extension expresses the user's standing request to use Herdr for otherwise-permitted Pi delegation. For worker execution only, that satisfies the CLI skill's explicit-Herdr-request requirement and permits project-local sibling panes or tabs. It does not authorize delegation forbidden by the task or unrelated Herdr operations.
+Enabling Flock is the user's standing request to prefer visible Pi workers through Herdr when delegation is useful and permitted. For delegation, this satisfies the Herdr skill's requirement for an explicit request to use Herdr. Flock does not launch workers itself.
 
-- Delegate only when useful and permitted. Define the required expert on demand; existing role definitions are optional references.
-- Use visible Pi workers through Herdr, not hidden Agent/SubagentWorkflow mechanisms. This is guidance, not tool enforcement.
-- Prefer sibling splits; use tabs when layout requires. Stay in the caller's workspace and working directory; preserve focus. Different projects, new workspaces, and worktrees require separate authorization.
-- Give each worker a bounded task, expertise, context, read/edit scope, verification, completion criteria, and model/thinking choice. Honor user preferences; hardcode no providers, roles, or escalation tiers.
-- Use returned surface IDs. Observe state and read results; submission is not completion. Inspect timeouts before retrying to avoid duplicate tasks. Access failures need an available model, not identical retries.
-- Parent verifies actual results/diffs and relevant checks. Avoid concurrent conflicting writes. Prompt restrictions are not a sandbox.
-- Close only task-created surfaces after collecting results unless retention was requested. No silent fallback to hidden workers when Herdr fails.
+- Follow the user's instructions, including restrictions on delegation and editing.
+- Default to the current project and Herdr workspace; preserve the user's focus.
+- Follow the live Herdr skill for worker setup, verification, and cleanup. Honor requested models and thinking levels.
+- If visible delegation fails, report the blocker; do not silently fall back to hidden workers.
 
-This appendix is an explicit local policy exception for worker transport and project-local topology—not a claim that upstream Herdr grants blanket permission. Other operations retain the live skill's consent and safety requirements. Later explicit user instructions take precedence over this default preference.`;
+These are instructions, not enforcement. Herdr's own safety and permission rules still apply.`;
 
 function active(): boolean {
 	return process.env.HERDR_ENV === "1" &&

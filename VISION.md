@@ -20,7 +20,7 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 
 The implementation uses one extension file, an in-memory cache, an initialization identity, and three hooks: `session_start`, `session_shutdown`, and `before_agent_start`. It normally modifies Pi's structured `systemPromptOptions.sections`, without adding conversation messages. Pi ignores those sections when `forceSystemPrompt` is set, so in that case the hook also returns a `systemPrompt` override preserving the current prompt and appending the labeled instructions.
 
-Pi 1.2.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x). Earlier tests covered Pi 1.1.0; the current suite runs only against the pinned Pi 1.2.0 dependency, not both versions.
+Pi 1.3.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x). Earlier tests covered Pi 1.1.0; the current suite runs only against the pinned Pi 1.3.0 dependency, not both versions.
 
 Use the stable section key `pi_herdr_flock`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
 
@@ -28,21 +28,16 @@ Caching saves process launches, **not context tokens**. Installed-binary changes
 
 ## Delegation policy appendix
 
-Keep CLI output unchanged. Append a clearly labeled, narrowly scoped user preference:
+Keep CLI output unchanged. Append only Flock's delegation preference; leave operational details to the live skill.
 
-> This enabled extension expresses the user's standing request to use Herdr for otherwise-permitted Pi delegation. For worker execution only, that satisfies the CLI skill's explicit-Herdr-request requirement and permits project-local sibling panes or tabs. It does not authorize delegation forbidden by the task or unrelated Herdr operations.
+Enabling Flock is the user's standing request to prefer visible Pi workers through Herdr when delegation is useful and permitted. For delegation, this satisfies the Herdr skill's requirement for an explicit request to use Herdr. Flock does not launch workers itself.
 
-Worker guidance:
+- Follow the user's instructions, including restrictions on delegation and editing.
+- Default to the current project and Herdr workspace; preserve the user's focus.
+- Follow the live Herdr skill for worker setup, verification, and cleanup. Honor requested models and thinking levels.
+- If visible delegation fails, report the blocker; do not silently fall back to hidden workers.
 
-- Delegate only when useful and permitted. Define the required expert on demand; existing role definitions are optional references.
-- Use visible Pi workers through Herdr, not hidden `Agent`/`SubagentWorkflow` mechanisms. This is guidance, not tool enforcement.
-- Prefer sibling splits; use tabs when layout requires. Stay in the caller's workspace and working directory; preserve focus. Different projects, new workspaces, and worktrees require separate authorization.
-- Give each worker a bounded task, expertise, context, read/edit scope, verification, completion criteria, and model/thinking choice. Honor user preferences; hardcode no providers, roles, or escalation tiers.
-- Use returned surface IDs. Observe state and read results; submission is not completion. Inspect timeouts before retrying to avoid duplicate tasks. Access failures need an available model, not identical retries.
-- Parent verifies actual results/diffs and relevant checks. Avoid concurrent conflicting writes. Prompt restrictions are not a sandbox.
-- Close only task-created surfaces after collecting results unless retention was requested. No silent fallback to hidden workers when Herdr fails.
-
-This appendix is an explicit local policy exception for worker transport and project-local topology—not a claim that upstream Herdr grants blanket permission. Other operations retain the live skill's consent and safety requirements. Later explicit user instructions take precedence over this default preference.
+These are instructions, not enforcement. Herdr's own safety and permission rules still apply.
 
 ## Non-goals
 
@@ -82,9 +77,9 @@ Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loadi
 
 ### Current verification coverage
 
-The integration harness uses Pi 1.2.0's `emitBeforeAgentStart(trigger, systemPromptOptions)` signature. User triggers supply `messageType: "user"`, `prompt`, and `images`; custom triggers supply `messageType: "custom"` and `message`. The extension only uses fields shared by both event variants, so the compatibility update changes the harness and development dependency without changing runtime behavior.
+The integration harness uses Pi 1.3.0's `emitBeforeAgentStart(trigger, systemPromptOptions)` signature. User triggers supply `messageType: "user"`, `prompt`, and `images`; custom triggers supply `messageType: "custom"` and `message`. The extension only uses fields shared by both event variants, so the compatibility update changes the harness and development dependency without changing runtime behavior.
 
-`npm test` covers mocked hooks and Pi 1.2.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible skill and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
+`npm test` covers mocked hooks and Pi 1.3.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible skill and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
 
 Fetch results are controlled, and triggers are dispatched directly through the extension runner. End-to-end runs initiated by another extension, complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
 
