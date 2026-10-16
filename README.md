@@ -44,9 +44,14 @@ If loading fails, Flock stays inactive and Pi shows a warning when a UI is avail
 
 ## Delegation limits
 
-Flock provides guidance, not enforcement. Your restrictions still apply. Work in other projects or worktrees, and unrelated Herdr operations, require permission. Hidden workers are not a fallback.
+Flock guides how Pi delegates; it is **not a sandbox or a technical security boundary**.
 
-Instructions consume context tokens. Loading a separate Herdr skill may duplicate them.
+- **You stay in control.** Pi must still follow instructions like “don't delegate” or “don't edit files.”
+- **Workers stay local by default.** Flock tells Pi to start workers in your current project and Herdr workspace.
+- **Pi is told to ask before going beyond that.** This includes other projects, Git worktrees, and Herdr actions unrelated to delegation. This is Flock's guidance—not a permission check enforced by Pi.
+- **No hidden workers.** If Herdr cannot run a visible worker, Pi should tell you—not quietly use a hidden one.
+
+Flock's instructions also use part of the model's context window. Loading a separate Herdr skill can duplicate those instructions and consume extra context tokens.
 
 See [the technical vision](./VISION.md) for development and design details.
 
