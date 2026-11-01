@@ -25,6 +25,7 @@ async function harness(exec, companion = false) {
   const bus = createEventBus();
   const loaded = await loadExtensionFromFactory(pi => extension({
     on: pi.on.bind(pi),
+    getSettings: () => ({}),
     exec,
   }), process.cwd(), bus, runtime, "flock");
   const extensions = [loaded];

@@ -32,13 +32,19 @@ Run Pi inside Herdr. If Pi was already running, use `/reload`.
 
 The footer shows `🐑 Flock` when instructions have loaded successfully. Compatible with `pi-minimal-footer` when extension statuses are enabled.
 
-Customize the label before launching Pi:
+Customize the label in `~/.pi/agent/settings.json` (or project `.pi/settings.json`):
 
-```sh
-PI_HERDR_FLOCK_STATUS="my flock" pi
+```json
+{
+  "piHerdrFlock": {
+    "footerStatus": "🐑"
+  }
+}
 ```
 
-An empty value hides the label without disabling the extension.
+Run `/reload` after editing settings. An empty string hides the label without disabling the extension. Project settings override user settings. If no string is configured, the default is `🐑 Flock`.
+
+**Deprecated:** `PI_HERDR_FLOCK_STATUS` still works as a fallback when no string setting is configured. Use `piHerdrFlock.footerStatus` in Pi settings instead.
 
 If loading fails, Flock stays inactive and Pi shows a warning when a UI is available. Check `herdr --skill`, then use `/reload`. Reload also picks up updated Herdr instructions.
 

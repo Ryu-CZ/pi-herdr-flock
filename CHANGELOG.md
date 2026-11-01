@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-01
+
+### Added
+
+- Customize the footer label with Pi setting `piHerdrFlock.footerStatus`; an empty string hides it, and the setting overrides `PI_HERDR_FLOCK_STATUS`
+
+### Deprecated
+
+- Deprecate `PI_HERDR_FLOCK_STATUS` in favor of Pi setting `piHerdrFlock.footerStatus`; the environment variable remains a fallback
+
 ## [0.2.4] - 2026-10-16
 
 ### Changed
@@ -77,7 +87,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keep complete Herdr instructions and ignore outdated instruction loads after session changes
 - Document installation and usage
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.1...v0.2.2

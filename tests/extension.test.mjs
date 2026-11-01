@@ -10,13 +10,14 @@ afterEach(() => keys.forEach((key, i) => {
   else process.env[key] = original[i];
 }));
 
-function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill" }), hasUI = true) {
+function setup(exec = async () => ({ code: 0, killed: false, stdout: "live skill" }), hasUI = true, settings = {}) {
   Object.assign(process.env, { HERDR_ENV: "1", HERDR_PANE_ID: "caller", HERDR_SOCKET_PATH: "/socket" });
   delete process.env.PI_HERDR_FLOCK_STATUS;
   const handlers = {};
   const calls = [];
   const warnings = [];
   extension({
+    getSettings: () => settings,
     on: (name, handler) => { handlers[name] = handler; },
     exec: (...args) => { calls.push(args); return exec(...args); },
   });
@@ -167,6 +168,28 @@ test("active footer status follows initialization and activation, without UI cal
   await headless.start();
   headless.turn();
   assert.equal(headless.statuses.size, 0);
+});
+
+test("Pi footer settings override environment values, including an empty label", async () => {
+  for (const label of ["🐑", "custom status", ""]) {
+    const h = setup(undefined, true, { piHerdrFlock: { footerStatus: label } });
+    process.env.PI_HERDR_FLOCK_STATUS = "environment label";
+    await h.start();
+    assert.equal(h.statuses.get("pi_herdr_flock"), label);
+    assert.ok(h.turn().pi_herdr_flock);
+    assert.equal(h.statuses.get("pi_herdr_flock"), label);
+  }
+});
+
+test("missing or invalid footer settings preserve the environment and default fallbacks", async () => {
+  for (const config of [undefined, null, {}, { footerStatus: null }, { footerStatus: false }, { footerStatus: 42 }]) {
+    const h = setup(undefined, true, { piHerdrFlock: config });
+    await h.start();
+    assert.equal(h.statuses.get("pi_herdr_flock"), "🐑 Flock");
+    process.env.PI_HERDR_FLOCK_STATUS = "fallback";
+    h.turn();
+    assert.equal(h.statuses.get("pi_herdr_flock"), "fallback");
+  }
 });
 
 test("shutdown invalidates pending initialization before context becomes stale", async () => {
