@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Verify compatibility with Pi 1.5.0; no runtime changes required
+
 ## [0.3.0] - 2026-11-01
 
 ### Added
