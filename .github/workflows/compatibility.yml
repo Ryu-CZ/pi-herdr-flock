@@ -25,7 +25,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Install target Pi version
-        run: npm install --no-save --package-lock=false @earendil-works/pi-coding-agent@${{ matrix.pi }}
+        run: npm install --save-dev --save-exact --package-lock=false @earendil-works/pi-coding-agent@${{ matrix.pi }}
       - run: npm ls @earendil-works/pi-coding-agent
       - run: npm test
       - run: npm run check
