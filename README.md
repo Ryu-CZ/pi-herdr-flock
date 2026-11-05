@@ -20,7 +20,7 @@ Flock loads `herdr --skill` at session start and tells Pi to prefer visible Herd
 
 ## Install
 
-Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Integration tests run against Pi **1.3.0**.
+Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Integration tests run against Pi **1.5.0**.
 
 ```sh
 pi install npm:pi-herdr-flock

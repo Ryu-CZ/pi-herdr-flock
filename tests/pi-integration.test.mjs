@@ -3,13 +3,20 @@ import { afterEach, test } from "node:test";
 import { getCurrentSystemMessage } from "@earendil-works/pi-ai";
 import extension from "../extensions/index.ts";
 
-// Pin these internal test seams to the declared Pi development dependency.
+// Adapt only the internal dispatch signature; exercise real Pi hooks and rendering.
 const core = new URL("../node_modules/@earendil-works/pi-coding-agent/dist/core/", import.meta.url);
 const { createEventBus } = await import(new URL("event-bus.js", core));
 const { createExtensionRuntime, loadExtensionFromFactory } = await import(new URL("extensions/loader.js", core));
 const { ExtensionRunner, emitSessionShutdownEvent } = await import(new URL("extensions/runner.js", core));
 const { SessionManager } = await import(new URL("session-manager.js", core));
 const { buildSystemPromptSections, buildSystemPromptState, diffSystemPromptSections } = await import(new URL("system-prompt.js", core));
+
+function beforeAgentStart(runner, trigger, options) {
+  // Pi 1.1 predates the trigger-object signature introduced in Pi 1.2.
+  return runner.emitBeforeAgentStart.length === 3
+    ? runner.emitBeforeAgentStart(trigger.prompt, trigger.images, options)
+    : runner.emitBeforeAgentStart(trigger, options);
+}
 
 const keys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH", "PI_HERDR_FLOCK_STATUS"];
 const original = keys.map(key => process.env[key]);
@@ -48,7 +55,7 @@ async function harness(exec, companion = false) {
     notify: (...args) => warnings.push(args),
   }, "tui");
   const start = reason => runner.emit({ type: "session_start", reason });
-  const turn = (forceSystemPrompt) => runner.emitBeforeAgentStart({ messageType: "user", prompt: "ordinary request", images: undefined }, {
+  const turn = (forceSystemPrompt) => beforeAgentStart(runner, { messageType: "user", prompt: "ordinary request", images: undefined }, {
     cwd: process.cwd(), sections: { unrelated: "keep" }, forceSystemPrompt,
   });
   return { runner, manager, errors, warnings, statuses, start, turn };
@@ -134,7 +141,7 @@ test("Pi session-transition start reasons refresh cached instructions and clear 
     calls++;
     return calls === 3 ? { code: 1, killed: false, stdout: "" } : success(`skill ${calls}`);
   });
-  for (const [index, reason] of ["startup", "new", "switch", "fork"].entries()) {
+  for (const [index, reason] of ["startup", "reload", "new", "resume", "fork"].entries()) {
     await h.start(reason);
     const turn = await h.turn();
     if (index === 2) {
@@ -142,19 +149,19 @@ test("Pi session-transition start reasons refresh cached instructions and clear 
       assert.equal(h.statuses.size, 0);
     } else assert.ok(turn.systemPromptOptions.sections.pi_herdr_flock.startsWith(`skill ${index + 1}\n\n`));
   }
-  assert.equal(calls, 4);
+  assert.equal(calls, 5);
   assert.equal(h.warnings.length, 1);
   assert.deepEqual(h.errors, []);
 });
 
-test("Pi 1.3 custom-message starts retain Flock policy without prompt or images", async () => {
+test("Pi starts without user prompt or images retain Flock policy", async () => {
   const h = await harness(async () => success("live custom-run skill"), true);
   await h.start("startup");
   const trigger = { messageType: "custom", message: {
     role: "custom", customType: "test", content: "start a run", display: false, timestamp: 1,
   } };
   for (const forceSystemPrompt of [undefined, "forced custom prompt"]) {
-    const result = await h.runner.emitBeforeAgentStart(trigger, {
+    const result = await beforeAgentStart(h.runner, trigger, {
       cwd: process.cwd(), sections: { unrelated: "keep" }, forceSystemPrompt,
     });
     const state = buildSystemPromptState(result.systemPromptOptions);
@@ -173,7 +180,7 @@ test("Pi 1.3 custom-message starts retain Flock policy without prompt or images"
     assert.deepEqual(h.errors, []);
   }
   delete process.env.HERDR_ENV;
-  const inactive = await h.runner.emitBeforeAgentStart(trigger, {
+  const inactive = await beforeAgentStart(h.runner, trigger, {
     cwd: process.cwd(), sections: { pi_herdr_flock: "stale", unrelated: "keep" },
   });
   assert.equal(inactive.systemPromptOptions.sections.pi_herdr_flock, undefined);

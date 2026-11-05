@@ -1,0 +1,31 @@
+name: Pi compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pi: ['1.1.0', '1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+      - run: npm ci
+      - name: Install target Pi version
+        run: npm install --no-save --package-lock=false @earendil-works/pi-coding-agent@${{ matrix.pi }}
+      - run: npm ls @earendil-works/pi-coding-agent
+      - run: npm test
+      - run: npm run check
