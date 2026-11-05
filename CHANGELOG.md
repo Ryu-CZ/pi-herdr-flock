@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remind Pi to close its workers and panes after verifying results, leaving existing panes untouched
 - Verify compatibility with Pi 1.5.0
+- Explain why Herdr instructions could not load and how to retry
 
 ## [0.3.0] - 2026-11-01
 

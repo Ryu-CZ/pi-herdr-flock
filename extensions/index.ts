@@ -1,3 +1,5 @@
+import { accessSync, constants } from "node:fs";
+import { delimiter, join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const SECTION = "pi_herdr_flock";
@@ -18,6 +20,18 @@ Enabling Flock is the user's standing request to prefer visible Pi workers throu
 
 These are instructions, not enforcement. Herdr's own safety and permission rules still apply.`;
 
+// Older Pi versions discard spawn errors; inspect PATH only when execution gives no detail.
+function herdrOnPath(): boolean {
+	return (process.env.PATH ?? "").split(delimiter).some(directory => {
+		try {
+			accessSync(join(directory, process.platform === "win32" ? "herdr.exe" : "herdr"), constants.X_OK);
+			return true;
+		} catch {
+			return false;
+		}
+	});
+}
+
 function active(): boolean {
 	return process.env.HERDR_ENV === "1" &&
 		Boolean(process.env.HERDR_PANE_ID?.trim()) &&
@@ -34,17 +48,26 @@ export default function (pi: ExtensionAPI) {
 		if (ctx.hasUI) ctx.ui.setStatus(SECTION, undefined);
 		if (!active()) return;
 
+		let failure = "could not load herdr instructions";
 		try {
 			const result = await pi.exec("herdr", ["--skill"], { timeout: 5000 });
 			if (identity !== initialization) return;
-			if (result.code !== 0 || result.killed || !result.stdout.trim()) {
-				throw new Error("herdr --skill did not return usable instructions");
-			}
+			if (result.killed) failure = "herdr --skill timed out or was stopped";
+			else if (result.code !== 0) {
+				failure = /\bENOENT\b/.test(result.stderr ?? "") || (!result.stderr && !herdrOnPath())
+					? "herdr was not found on PATH"
+					: `herdr --skill failed (exit ${result.code})`;
+			} else if (!result.stdout.trim()) failure = "herdr --skill returned no instructions";
+			if (result.code !== 0 || result.killed || !result.stdout.trim()) throw new Error(failure);
 			cached = `${result.stdout}\n\n${POLICY}`;
 			if (ctx.hasUI && active()) ctx.ui.setStatus(SECTION, statusText(pi));
-		} catch {
+		} catch (error) {
 			if (identity === initialization && ctx.hasUI) {
-				ctx.ui.notify("pi-herdr-flock: could not load herdr --skill; instructions omitted.", "warning");
+				const message = error instanceof Error ? error.message : "";
+				if ((error as NodeJS.ErrnoException)?.code === "ENOENT" || /\bENOENT\b/.test(message)) {
+					failure = "herdr was not found on PATH";
+				} else if (/timeout|timed out/i.test(message)) failure = "herdr --skill timed out or was stopped";
+				ctx.ui.notify(`pi-herdr-flock: ${failure}; instructions omitted. Check herdr --skill works on PATH, then use /reload.`, "warning");
 			}
 		}
 	});

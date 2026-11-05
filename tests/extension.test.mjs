@@ -3,7 +3,7 @@ import { afterEach, test } from "node:test";
 import extension from "../extensions/index.ts";
 
 const activationKeys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH"];
-const keys = [...activationKeys, "PI_HERDR_FLOCK_STATUS"];
+const keys = [...activationKeys, "PI_HERDR_FLOCK_STATUS", "PATH"];
 const original = keys.map(key => process.env[key]);
 afterEach(() => keys.forEach((key, i) => {
   if (original[i] === undefined) delete process.env[key];
@@ -102,6 +102,33 @@ test("invalid results and thrown missing-CLI/timeout errors omit cache and warn 
   const h = setup(async () => { throw new Error("missing"); }, false);
   await h.start();
   assert.equal(h.warnings.length, 0);
+});
+
+test("initialization warnings identify failures and explain recovery", async () => {
+  const cases = [
+    [{ code: 1, killed: false, stdout: "", stderr: "spawn herdr ENOENT" }, "herdr was not found on PATH"],
+    [Object.assign(new Error("missing"), { code: "ENOENT" }), "herdr was not found on PATH"],
+    [new Error("ENOENT"), "herdr was not found on PATH"],
+    [{ code: 0, killed: true, stdout: "partial" }, "timed out or was stopped"],
+    [new Error("timeout"), "timed out or was stopped"],
+    [{ code: 2, killed: false, stdout: "", stderr: "failed" }, "herdr --skill failed (exit 2)"],
+    [{ code: 0, killed: false, stdout: " \n" }, "herdr --skill returned no instructions"],
+    [new Error("unexpected"), "could not load herdr instructions"],
+  ];
+  for (const [failure, reason] of cases) {
+    const h = setup(async () => { if (failure instanceof Error) throw failure; return failure; });
+    await h.start();
+    assert.equal(h.warnings.length, 1);
+    assert.ok(h.warnings[0][0].includes(reason), h.warnings[0][0]);
+    assert.ok(h.warnings[0][0].includes("/reload"));
+    assert.equal(h.warnings[0][1], "warning");
+    assert.deepEqual(h.turn(), {});
+  }
+  // Pi 1.1 drops spawn-error details; an empty PATH still identifies a missing executable.
+  const h = setup(async () => ({ code: 1, killed: false, stdout: "", stderr: "" }));
+  process.env.PATH = "";
+  await h.start();
+  assert.ok(h.warnings[0][0].includes("herdr was not found on PATH"));
 });
 
 test("new initialization clears success, including while pending and on failure", async () => {

@@ -5,6 +5,7 @@ import extension from "../extensions/index.ts";
 
 // Adapt only the internal dispatch signature; exercise real Pi hooks and rendering.
 const core = new URL("../node_modules/@earendil-works/pi-coding-agent/dist/core/", import.meta.url);
+const { execCommand } = await import(new URL("exec.js", core));
 const { createEventBus } = await import(new URL("event-bus.js", core));
 const { createExtensionRuntime, loadExtensionFromFactory } = await import(new URL("extensions/loader.js", core));
 const { ExtensionRunner, emitSessionShutdownEvent } = await import(new URL("extensions/runner.js", core));
@@ -18,7 +19,7 @@ function beforeAgentStart(runner, trigger, options) {
     : runner.emitBeforeAgentStart(trigger, options);
 }
 
-const keys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH", "PI_HERDR_FLOCK_STATUS"];
+const keys = ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH", "PI_HERDR_FLOCK_STATUS", "PATH"];
 const original = keys.map(key => process.env[key]);
 afterEach(() => keys.forEach((key, i) => {
   if (original[i] === undefined) delete process.env[key];
@@ -60,6 +61,17 @@ async function harness(exec, companion = false) {
   });
   return { runner, manager, errors, warnings, statuses, start, turn };
 }
+
+test("real Pi exec reports a missing Herdr executable with recovery guidance", async () => {
+  const h = await harness((command, args, options) => execCommand(command, args, process.cwd(), options));
+  process.env.PATH = "";
+  await h.start("startup");
+  assert.equal(h.warnings.length, 1);
+  assert.ok(h.warnings[0][0].includes("herdr was not found on PATH"));
+  assert.ok(h.warnings[0][0].includes("/reload"));
+  assert.equal((await h.turn()).systemPromptOptions.sections.pi_herdr_flock, undefined);
+  assert.deepEqual(h.errors, []);
+});
 
 const success = stdout => ({ code: 0, killed: false, stdout });
 
