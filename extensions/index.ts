@@ -13,6 +13,7 @@ Enabling Flock is the user's standing request to prefer visible Pi workers throu
 - Follow the user's instructions, including restrictions on delegation and editing.
 - Default to the current project and Herdr workspace; preserve the user's focus.
 - Follow the live Herdr skill for worker setup, verification, and cleanup. Honor requested models and thinking levels.
+- After collecting and verifying results, close workers and panes you created; leave pre-existing panes untouched.
 - If visible delegation fails, report the blocker; do not silently fall back to hidden workers.
 
 These are instructions, not enforcement. Herdr's own safety and permission rules still apply.`;

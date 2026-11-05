@@ -72,6 +72,7 @@ test("full output and policy reassert one section across turns and fresh post-co
     "preserve the user's focus",
     "Follow the live Herdr skill",
     "Honor requested models and thinking levels",
+    "After collecting and verifying results, close workers and panes you created; leave pre-existing panes untouched",
     "do not silently fall back to hidden workers",
     "Herdr's own safety and permission rules still apply",
   ]) assert.ok(sections.pi_herdr_flock.includes(clause), `missing policy clause: ${clause}`);

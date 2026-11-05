@@ -7,85 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Remind Pi to close its workers and panes after verifying results, leaving existing panes untouched
+- Verify compatibility with Pi 1.5.0
+
 ## [0.3.0] - 2026-11-01
 
 ### Added
 
-- Customize the footer label with Pi setting `piHerdrFlock.footerStatus`; an empty string hides it, and the setting overrides `PI_HERDR_FLOCK_STATUS`
+- Customize the footer label with `piHerdrFlock.footerStatus` in Pi settings; use an empty string to hide it
 
 ### Deprecated
 
-- Deprecate `PI_HERDR_FLOCK_STATUS` in favor of Pi setting `piHerdrFlock.footerStatus`; the environment variable remains a fallback
+- Deprecate `PI_HERDR_FLOCK_STATUS` in favor of `piHerdrFlock.footerStatus`; the environment variable remains a fallback
 
 ## [0.2.4] - 2026-10-16
 
 ### Changed
 
-- Shorten Flock's delegation instructions and leave worker setup and cleanup guidance to Herdr
-- Remove an internal instruction to ask for extra approval before using other projects or Git worktrees. No features are removed. Herdr's rules and your instructions still apply
-- Make the README clearer about what Flock does and does not control
-- Update the documented tested Pi version to 1.3.0
+- Follow Herdr's guidance for worker setup and cleanup
+- Stop asking for extra approval to use other projects or Git worktrees; your instructions and Herdr's safety rules still apply
 
 ## [0.2.3] - 2026-10-14
 
 ### Added
 
-- Add animated gallery and README previews with a full-speed video of nested visible worker delegation
+- Add animated previews and a video showing visible worker delegation
 
 ### Changed
 
-- Host preview media on GitHub instead of bundling it in npm installs
+- Reduce installation size by hosting preview media on GitHub
 
 ### Fixed
 
-- Update the integration harness for Pi 1.2.0 and verify user and custom-message starts, including skill and policy injection, forced-prompt preservation, and inactive cleanup
-- Clarify compatibility and verification limits in the README and technical vision; runtime behavior is unchanged
+- Verify compatibility with Pi 1.2.0
 
 ## [0.2.2] - 2026-10-12
 
 ### Changed
 
 - Capitalize the default footer label to `🐑 Flock`
-- Simplify the README for users; keep development and design details in `VISION.md`
 
 ### Fixed
 
-- Fix missing Herdr instructions and delegation guidance when another extension has already replaced Pi's system prompt
+- Keep Herdr instructions available when another extension replaces Pi's system prompt
 
 ## [0.2.1] - 2026-10-10
 
 ### Added
 
-- Add README badges, delegation diagrams, and a preview in the Pi package gallery
-
-### Changed
-
-- Clarify the package description for visible Herdr worker delegation
-- Simplify the README and document installation through npm
+- Add delegation diagrams and a preview in the Pi package gallery
 
 ## [0.2.0] - 2026-10-10
 
 ### Added
 
-- Show `🐑 flock` in the footer after successful initialization; configure the label with `PI_HERDR_FLOCK_STATUS` and clear it when inactive or initialization fails
-
-### Changed
-
-- Tighten the user-facing README and move implementation/verification details into the technical vision
+- Show `🐑 flock` in the footer when Flock is active; customize it with `PI_HERDR_FLOCK_STATUS`
 
 ### Fixed
 
-- Prevent outdated instructions or warnings from appearing when a pending Herdr instruction load finishes after reload or shutdown
+- Prevent outdated instructions or warnings after reload or shutdown
 
-## 0.1.0
+## [0.1.0] - 2026-10-08
 
 ### Added
 
-- Load the installed Herdr instructions when a session starts inside Herdr
-- Give Pi guidance for delegation through visible workers in the current project
-- Omit instructions outside Herdr or after failed initialization
-- Keep complete Herdr instructions and ignore outdated instruction loads after session changes
-- Document installation and usage
+- Give Pi the installed Herdr instructions and guidance for delegating to visible workers in the current project
+- Activate only inside Herdr, when its instructions load successfully
 
 [Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.4...v0.3.0
@@ -94,3 +83,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.2]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Ryu-CZ/pi-herdr-flock/releases/tag/v0.2.0
+[0.1.0]: https://www.npmjs.com/package/pi-herdr-flock/v/0.1.0
