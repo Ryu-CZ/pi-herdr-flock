@@ -13,14 +13,14 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 | Validation | Accept only `code === 0`, not killed, and nonempty stdout. Preserve complete instruction text; no silent truncation. |
 | Storage | In-memory cache only. No bundled fallback, generated file, skill registration, or filesystem writes. |
 | Injection | Before the first and every subsequent agent run inside Herdr, assign cached text + policy to the `pi_herdr_flock` prompt section. If `forceSystemPrompt` is already set, also return the current prompt with an explicit `<pi_herdr_flock>` appendix so the model receives the instructions. No prompt-keyword gate. |
-| Failure | Leave cache empty; omit the section. Warn once per failed initialization where UI is available; do not crash Pi or inject stale text. |
+| Failure | Leave cache empty; omit the section. Warn once per failed initialization where UI is available, distinguishing missing CLI, timeout/stopped execution, nonzero exit, or empty instructions; include `/reload` recovery guidance. On older Pi versions that discard spawn errors, inspect PATH after an unexplained failed execution. Do not crash Pi or inject stale text. |
 | Refresh | Reload/session changes fetch again. Ignore late results from superseded initialization, including after runtime teardown. No periodic refresh or per-turn subprocess. |
 | Outside Herdr | No fetch, injected section, or delegation-policy change. |
-| Status | Show `🐑 Flock` by default (override with `PI_HERDR_FLOCK_STATUS`) through Pi's extension-status API after successful initialization where UI is available. An empty override hides the label. Clear it when inactive or initialization fails; do not replace the footer. |
+| Status | Show `🐑 Flock` by default through Pi's extension-status API after successful initialization where UI is available. A string setting `piHerdrFlock.footerStatus` takes precedence over deprecated `PI_HERDR_FLOCK_STATUS`, then the default. An empty string hides the label without disabling instructions. Clear it when inactive or initialization fails; do not replace the footer. |
 
 The implementation uses one extension file, an in-memory cache, an initialization identity, and three hooks: `session_start`, `session_shutdown`, and `before_agent_start`. It normally modifies Pi's structured `systemPromptOptions.sections`, without adding conversation messages. Pi ignores those sections when `forceSystemPrompt` is set, so in that case the hook also returns a `systemPrompt` override preserving the current prompt and appending the labeled instructions.
 
-Pi 1.3.0 is the pinned development and integration-test version. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility with every Pi version. The README documents the supported minimum as Pi 1.1.0 (1.x). Earlier tests covered Pi 1.1.0; the current suite runs only against the pinned Pi 1.3.0 dependency, not both versions.
+Pi 1.5.0 is the pinned development version. Tests and TypeScript checks pass against both the supported minimum Pi 1.1.0 and Pi 1.5.0, the latest published 1.x at verification. The CI matrix installs Pi 1.1.0 and the latest 1.x on pushes, pull requests, manual dispatch, and weekly runs. The package uses a `"*"` host peer dependency following Pi's packaging convention; this does not guarantee compatibility outside the documented Pi 1.x range or with every intervening release.
 
 Use the stable section key `pi_herdr_flock`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
 
@@ -35,6 +35,7 @@ Enabling Flock is the user's standing request to prefer visible Pi workers throu
 - Follow the user's instructions, including restrictions on delegation and editing.
 - Default to the current project and Herdr workspace; preserve the user's focus.
 - Follow the live Herdr skill for worker setup, verification, and cleanup. Honor requested models and thinking levels.
+- After collecting and verifying results, close workers and panes you created; leave pre-existing panes untouched.
 - If visible delegation fails, report the blocker; do not silently fall back to hidden workers.
 
 These are instructions, not enforcement. Herdr's own safety and permission rules still apply.
@@ -58,6 +59,15 @@ npm run check
 npm pack --dry-run
 ```
 
+Test a different supported Pi version without changing the manifest or lockfile:
+
+```sh
+npm install --no-save --package-lock=false @earendil-works/pi-coding-agent@1.1.0
+npm test
+npm run check
+npm ci # restore the pinned development version
+```
+
 Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loading the installed package alongside the checkout when testing injection.
 
 ## Verification
@@ -77,11 +87,11 @@ Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loadi
 
 ### Current verification coverage
 
-The integration harness uses Pi 1.3.0's `emitBeforeAgentStart(trigger, systemPromptOptions)` signature. User triggers supply `messageType: "user"`, `prompt`, and `images`; custom triggers supply `messageType: "custom"` and `message`. The extension only uses fields shared by both event variants, so the compatibility update changes the harness and development dependency without changing runtime behavior.
+The integration harness adapts Pi 1.1's internal `emitBeforeAgentStart(prompt, images, systemPromptOptions)` signature to the trigger-object signature used since Pi 1.2. Both paths exercise the real extension loader/runner and prompt renderer. On newer Pi, user and custom-message triggers are checked; on Pi 1.1, the no-prompt/no-images case exercises the legacy dispatch seam, not an end-to-end custom-message run.
 
-`npm test` covers mocked hooks and Pi 1.3.0's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible skill and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
+`npm test` covers mocked hooks and the installed Pi version's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible skill and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
 
-Fetch results are controlled, and triggers are dispatched directly through the extension runner. End-to-end runs initiated by another extension, complete interactive reload/session-switch flows, live CLI subprocess behavior, and real Herdr workers remain manual integration checks.
+Fetch results are controlled except for a real Pi subprocess test of a missing Herdr executable. Triggers are dispatched directly through the extension runner. End-to-end runs initiated by another extension, complete interactive reload/session-switch flows, successful live Herdr instruction loading, and real Herdr workers remain manual integration checks.
 
 The extension's cache is memory-only and it performs no direct filesystem writes or custom conversation-message injection. Pi may persist injected system-prompt sections in session history.
 

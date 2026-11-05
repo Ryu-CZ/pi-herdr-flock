@@ -20,7 +20,7 @@ Flock loads `herdr --skill` at session start and tells Pi to prefer visible Herd
 
 ## Install
 
-Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Integration tests run against Pi **1.5.0**.
+Requires Pi **1.1.0 or later (1.x)**, Node.js **22.19.0 or later**, and `herdr` on PATH. Tests cover Pi **1.1.0** and **1.5.0**; CI also checks the latest Pi **1.x**.
 
 ```sh
 pi install npm:pi-herdr-flock
@@ -46,7 +46,7 @@ Run `/reload` after editing settings. An empty string hides the label without di
 
 **Deprecated:** `PI_HERDR_FLOCK_STATUS` still works as a fallback when no string setting is configured. Use `piHerdrFlock.footerStatus` in Pi settings instead.
 
-If loading fails, Flock stays inactive and Pi shows a warning when a UI is available. Check `herdr --skill`, then use `/reload`. Reload also picks up updated Herdr instructions.
+If loading fails, Flock stays inactive and Pi shows a warning explaining the failure when a UI is available. Check that `herdr --skill` works on PATH, then use `/reload`. Reload also picks up updated Herdr instructions.
 
 ## Delegation limits
 
@@ -55,6 +55,7 @@ Flock guides how Pi delegates; it is **not a sandbox or a technical security bou
 - **You stay in control.** Pi must still follow instructions like “don't delegate” or “don't edit files.”
 - **Workers stay local by default.** Flock tells Pi to start workers in your current project and Herdr workspace.
 - **Herdr's own rules still apply.** Flock adds no extra approval requirements for other projects or Git worktrees.
+- **Clean up afterward.** Pi should close workers and panes it created after verifying results, leaving existing panes untouched.
 - **No hidden workers.** If Herdr cannot run a visible worker, Pi should tell you—not quietly use a hidden one.
 
 Flock's instructions also use part of the model's context window. Loading a separate Herdr skill can duplicate those instructions and consume extra context tokens.
