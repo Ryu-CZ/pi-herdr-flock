@@ -48,7 +48,7 @@ export default function (pi: ExtensionAPI) {
 		if (ctx.hasUI) ctx.ui.setStatus(SECTION, undefined);
 		if (!active()) return;
 
-		let failure = "could not load herdr instructions";
+		let failure: string | undefined;
 		try {
 			const result = await pi.exec("herdr", ["--skill"], { timeout: 5000 });
 			if (identity !== initialization) return;
@@ -58,7 +58,7 @@ export default function (pi: ExtensionAPI) {
 					? "herdr was not found on PATH"
 					: `herdr --skill failed (exit ${result.code})`;
 			} else if (!result.stdout.trim()) failure = "herdr --skill returned no instructions";
-			if (result.code !== 0 || result.killed || !result.stdout.trim()) throw new Error(failure);
+			if (failure) throw new Error(failure);
 			cached = `${result.stdout}\n\n${POLICY}`;
 			if (ctx.hasUI && active()) ctx.ui.setStatus(SECTION, statusText(pi));
 		} catch (error) {
@@ -67,7 +67,7 @@ export default function (pi: ExtensionAPI) {
 				if ((error as NodeJS.ErrnoException)?.code === "ENOENT" || /\bENOENT\b/.test(message)) {
 					failure = "herdr was not found on PATH";
 				} else if (/timeout|timed out/i.test(message)) failure = "herdr --skill timed out or was stopped";
-				ctx.ui.notify(`pi-herdr-flock: ${failure}; instructions omitted. Check herdr --skill works on PATH, then use /reload.`, "warning");
+				ctx.ui.notify(`pi-herdr-flock: ${failure ?? "could not load herdr instructions"}; instructions omitted. Check herdr --skill works on PATH, then use /reload.`, "warning");
 			}
 		}
 	});

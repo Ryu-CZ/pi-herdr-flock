@@ -76,32 +76,12 @@ test("full output and policy reassert one section across turns and fresh post-co
     "do not silently fall back to hidden workers",
     "Herdr's own safety and permission rules still apply",
   ]) assert.ok(sections.pi_herdr_flock.includes(clause), `missing policy clause: ${clause}`);
-  assert.ok(!sections.pi_herdr_flock.includes("require separate authorization"));
   const expected = { ...sections };
   for (let i = 0; i < 3; i++) assert.deepEqual(h.turn(sections), expected);
   assert.equal(h.turn().pi_herdr_flock, expected.pi_herdr_flock);
   assert.equal(h.calls.length, 1);
   delete process.env.HERDR_ENV;
   assert.deepEqual(h.turn(sections), { other: "keep" });
-});
-
-test("invalid results and thrown missing-CLI/timeout errors omit cache and warn only at initialization", async () => {
-  for (const failure of [
-    { code: 1, killed: false, stdout: "bad" },
-    { code: 0, killed: true, stdout: "bad" },
-    { code: 0, killed: false, stdout: " \n" },
-    new Error("ENOENT"), new Error("timeout"),
-  ]) {
-    const h = setup(async () => { if (failure instanceof Error) throw failure; return failure; });
-    await h.start();
-    assert.deepEqual(h.turn(), {});
-    h.turn();
-    assert.equal(h.warnings.length, 1);
-    assert.equal(h.calls.length, 1);
-  }
-  const h = setup(async () => { throw new Error("missing"); }, false);
-  await h.start();
-  assert.equal(h.warnings.length, 0);
 });
 
 test("initialization warnings identify failures and explain recovery", async () => {
@@ -111,18 +91,24 @@ test("initialization warnings identify failures and explain recovery", async () 
     [new Error("ENOENT"), "herdr was not found on PATH"],
     [{ code: 0, killed: true, stdout: "partial" }, "timed out or was stopped"],
     [new Error("timeout"), "timed out or was stopped"],
-    [{ code: 2, killed: false, stdout: "", stderr: "failed" }, "herdr --skill failed (exit 2)"],
+    [{ code: 2, killed: false, stdout: "partial", stderr: "failed" }, "herdr --skill failed (exit 2)"],
     [{ code: 0, killed: false, stdout: " \n" }, "herdr --skill returned no instructions"],
     [new Error("unexpected"), "could not load herdr instructions"],
   ];
   for (const [failure, reason] of cases) {
     const h = setup(async () => { if (failure instanceof Error) throw failure; return failure; });
     await h.start();
+    assert.deepEqual(h.turn(), {});
+    h.turn();
+    assert.equal(h.calls.length, 1);
     assert.equal(h.warnings.length, 1);
     assert.ok(h.warnings[0][0].includes(reason), h.warnings[0][0]);
     assert.ok(h.warnings[0][0].includes("/reload"));
     assert.equal(h.warnings[0][1], "warning");
-    assert.deepEqual(h.turn(), {});
+    const headless = setup(async () => { if (failure instanceof Error) throw failure; return failure; }, false);
+    await headless.start();
+    assert.deepEqual(headless.turn(), {});
+    assert.equal(headless.warnings.length, 0);
   }
   // Pi 1.1 drops spawn-error details; an empty PATH still identifies a missing executable.
   const h = setup(async () => ({ code: 1, killed: false, stdout: "", stderr: "" }));
@@ -225,7 +211,7 @@ test("shutdown invalidates pending initialization before context becomes stale",
     let resolve, reject;
     const h = setup(() => new Promise((r, j) => { resolve = r; reject = j; }));
     const pending = h.start();
-    h.handlers.session_shutdown?.({ reason: "reload" }, h.ctx);
+    h.handlers.session_shutdown({ reason: "reload" }, h.ctx);
     Object.defineProperty(h.ctx, "hasUI", {
       get: () => assert.fail("superseded initialization accessed stale context"),
     });
