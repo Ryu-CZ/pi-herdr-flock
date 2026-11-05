@@ -33,8 +33,7 @@
     "extensions/",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE",
-    "VISION.md"
+    "LICENSE"
   ],
   "engines": {
     "node": ">=22.19.0"

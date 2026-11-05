@@ -60,6 +60,6 @@ Flock guides how Pi delegates; it is **not a sandbox or a technical security bou
 
 Flock's instructions also use part of the model's context window. Loading a separate Herdr skill can duplicate those instructions and consume extra context tokens.
 
-See [the technical vision](./VISION.md) for development and design details.
+See [the technical vision](https://github.com/Ryu-CZ/pi-herdr-flock/blob/main/VISION.md) for development and design details.
 
 MIT licensed.

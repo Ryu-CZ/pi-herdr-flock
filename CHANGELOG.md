@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Reduce installation size by keeping developer documentation on GitHub
+
 ## [0.3.1] - 2026-11-05
 
 ### Fixed
