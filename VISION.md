@@ -2,7 +2,7 @@
 
 ## Scope
 
-Automatically inject the installed `herdr --skill` output into Pi context when running inside Herdr, plus a short project-local delegation policy. Instructions only; no execution host.
+Automatically inject a compact pointer to the installed `herdr --skill` manual into Pi context when running inside Herdr, plus a short project-local delegation policy. Set `piHerdrFlock.compact` to `false` to inject the full manual instead. Instructions only; no execution host.
 
 ## Runtime contract
 
@@ -10,9 +10,9 @@ Automatically inject the installed `herdr --skill` output into Pi context when r
 | --- | --- |
 | Activation | `HERDR_ENV === "1"`, nonempty `HERDR_PANE_ID` and `HERDR_SOCKET_PATH`. Use caller context, never infer the focused pane. |
 | Fetch | On `session_start`, clear cached text; call `pi.exec("herdr", ["--skill"], { timeout: 5000 })` once when active. |
-| Validation | Accept only `code === 0`, not killed, and nonempty stdout. Preserve complete instruction text; no silent truncation. |
+| Validation | Accept only `code === 0`, not killed, and nonempty stdout. With `compact: false`, preserve complete instruction text; no silent truncation. |
 | Storage | In-memory cache only. No bundled fallback, generated file, skill registration, or filesystem writes. |
-| Injection | Before the first and every subsequent agent run inside Herdr, assign cached text + policy to the `pi_herdr_flock` prompt section. If `forceSystemPrompt` is already set, also return the current prompt with an explicit `<pi_herdr_flock>` appendix so the model receives the instructions. No prompt-keyword gate. |
+| Injection | Before the first and every subsequent agent run inside Herdr, assign the cached load pointer + policy (full manual + policy with `compact: false`) to the `pi_herdr_flock` prompt section. If `forceSystemPrompt` is already set, also return the current prompt with an explicit `<pi_herdr_flock>` appendix so the model receives the instructions. No prompt-keyword gate. |
 | Failure | Leave cache empty; omit the section. Warn once per failed initialization where UI is available, distinguishing missing CLI, timeout/stopped execution, nonzero exit, or empty instructions; include `/reload` recovery guidance. On older Pi versions that discard spawn errors, inspect PATH after an unexplained failed execution. Do not crash Pi or inject stale text. |
 | Refresh | Reload/session changes fetch again. Ignore late results from superseded initialization, including after runtime teardown. No periodic refresh or per-turn subprocess. |
 | Outside Herdr | No fetch, injected section, or delegation-policy change. |
@@ -24,11 +24,11 @@ Pi 1.5.0 is the pinned development version. Tests and TypeScript checks pass aga
 
 Use the stable section key `pi_herdr_flock`. Assign rather than concatenate; remove extension-owned content when inactive or uninitialized if the API retains it. Reassert instructions on subsequent agent starts; verify behavior across compaction and reload instead of assuming one-time injection survives.
 
-Caching saves process launches, **not context tokens**. Installed-binary changes take effect at the next initialization, not mid-session.
+Caching saves process launches. Default compact mode saves context tokens by injecting only a load pointer and policy; the agent must load the full live manual before Herdr inspection or control and reload it if no longer in context. With `compact: false`, caching does not save context tokens. Initialization still fetches and validates the installed manual in both modes; installed-binary changes take effect at the next initialization, or when the agent loads the manual on demand.
 
 ## Delegation policy appendix
 
-Keep CLI output unchanged. Append only Flock's delegation preference; leave operational details to the live skill.
+In compact mode, append Flock's delegation preference to the load pointer. With `compact: false`, keep CLI output unchanged and append only that preference. Leave operational details to the live skill.
 
 Enabling Flock is the user's standing request to prefer visible Pi workers through Herdr when delegation is useful and permitted. For delegation, this satisfies the Herdr skill's requirement for an explicit request to use Herdr. Flock does not launch workers itself.
 
@@ -77,10 +77,10 @@ Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loadi
 | Case | Expected |
 | --- | --- |
 | Missing activation variables | No exec or injected section. |
-| Successful initialization; ordinary prompt | One fetch; complete output + appendix injected without mentioning Herdr. |
+| Successful initialization; ordinary prompt | One fetch; load pointer + policy injected without mentioning Herdr. With `compact: false`, complete output + policy instead. |
 | Repeated turns | Same section key/content; no additional fetch or text growth. |
 | Missing CLI, timeout, killed/nonzero/empty result | No crash, fallback, stale text, or repeated per-turn warnings. |
-| Reload/session change | Fresh fetch; older pending result cannot replace current cache. |
+| Reload/session change | Fresh fetch; older pending result cannot replace current cache, verified with distinguishable full manuals using `compact: false`. |
 | Failed initialization after success | Previous cached instructions not retained. |
 | Compaction and continuation | Verify the prompt seam reasserts one section on subsequent starts. |
 | Coexisting extensions | Normal structured composition preserves other sections. An existing forced prompt is preserved with Flock appended to model-visible text. |
@@ -89,7 +89,7 @@ Try this checkout without installing: `pi -e ./extensions/index.ts`. Avoid loadi
 
 The integration harness adapts Pi 1.1's internal `emitBeforeAgentStart(prompt, images, systemPromptOptions)` signature to the trigger-object signature used since Pi 1.2. Both paths exercise the real extension loader/runner and prompt renderer. On newer Pi, user and custom-message triggers are checked; on Pi 1.1, the no-prompt/no-images case exercises the legacy dispatch seam, not an end-to-end custom-message run.
 
-`npm test` covers mocked hooks and the installed Pi version's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible skill and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the live skill and policy, one labeled appendix across repeated turns, and unchanged forced text when inactive.
+`npm test` covers mocked hooks and the installed Pi version's actual extension loader/runner, guarded-context reload teardown, prompt rendering, coexisting extensions, in-memory compaction, and session-start refresh dispatch. Runner-level custom-message starts are also checked without user-only prompt or image fields, including model-visible load-pointer and policy text, forced-prompt preservation, and inactive cleanup. The forced-prompt regression checks rendered model-visible text for the load pointer and policy, absence of the full manual in default compact mode, one labeled appendix across repeated turns, and unchanged forced text when inactive.
 
 Fetch results are controlled except for a real Pi subprocess test of a missing Herdr executable. Triggers are dispatched directly through the extension runner. End-to-end runs initiated by another extension, complete interactive reload/session-switch flows, successful live Herdr instruction loading, and real Herdr workers remain manual integration checks.
 

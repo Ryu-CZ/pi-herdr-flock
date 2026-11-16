@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-16
+
+### Fixed
+
+- Correct technical documentation to describe compact-mode defaults and full-manual opt-in
+
 ## [0.4.0] - 2026-11-16
 
 ### Added
@@ -90,7 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Give Pi the installed Herdr instructions and guidance for delegating to visible workers in the current project
 - Activate only inside Herdr, when its instructions load successfully
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.4...v0.3.0

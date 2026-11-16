@@ -156,7 +156,7 @@ test("new initialization clears success, including while pending and on failure"
 test("superseded successful and failed fetches cannot replace cache or warn", async () => {
   for (const rejected of [false, true]) {
     const pending = [];
-    const h = setup(() => new Promise((resolve, reject) => pending.push({ resolve, reject })));
+    const h = setup(() => new Promise((resolve, reject) => pending.push({ resolve, reject })), true, { piHerdrFlock: { compact: false } });
     const old = h.start();
     const latest = h.start();
     pending[1].resolve({ code: 0, killed: false, stdout: "latest" });
@@ -164,8 +164,9 @@ test("superseded successful and failed fetches cannot replace cache or warn", as
     if (rejected) pending[0].reject(new Error("late"));
     else pending[0].resolve({ code: 0, killed: false, stdout: "obsolete" });
     await old;
-    assert.ok(h.turn().pi_herdr_flock.startsWith("## Herdr — load on demand"));
-    assert.ok(!h.turn().pi_herdr_flock.includes("obsolete"));
+    const content = h.turn().pi_herdr_flock;
+    assert.ok(content.startsWith("latest\n\n"));
+    assert.ok(!content.includes("obsolete"));
     assert.equal(h.warnings.length, 0);
   }
 });
