@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-16
+
 ### Added
 
 - Add `piHerdrFlock.compact` (default `true`); set it to `false` to load full Herdr instructions at startup
@@ -88,7 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Give Pi the installed Herdr instructions and guidance for delegating to visible workers in the current project
 - Activate only inside Herdr, when its instructions load successfully
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/Ryu-CZ/pi-herdr-flock/compare/v0.2.3...v0.2.4
