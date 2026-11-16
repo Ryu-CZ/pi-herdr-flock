@@ -16,7 +16,7 @@ Guides Pi to delegate work to a visible flock of Herdr terminals.
   and all four worker panes close after results are collected.
 </p>
 
-Flock loads `herdr --skill` at session start and tells Pi to prefer visible Herdr workers when delegation is useful. It does not launch workers itself and stays inactive outside Herdr.
+Flock adds a short instruction to load the live `herdr --skill` manual before any Herdr control, plus a preference for visible Herdr workers when delegation is useful. It does not launch workers itself and stays inactive outside Herdr.
 
 ## Install
 
@@ -37,7 +37,8 @@ Customize the label in `~/.pi/agent/settings.json` (or project `.pi/settings.jso
 ```json
 {
   "piHerdrFlock": {
-    "footerStatus": "🐑"
+    "footerStatus": "🐑",
+    "compact": true
   }
 }
 ```
@@ -46,7 +47,7 @@ Run `/reload` after editing settings. An empty string hides the label without di
 
 **Deprecated:** `PI_HERDR_FLOCK_STATUS` still works as a fallback when no string setting is configured. Use `piHerdrFlock.footerStatus` in Pi settings instead.
 
-If loading fails, Flock stays inactive and Pi shows a warning explaining the failure when a UI is available. Check that `herdr --skill` works on PATH, then use `/reload`. Reload also picks up updated Herdr instructions.
+At startup, Flock checks that `herdr --skill` succeeds without adding its manual to context. If the check fails, Flock stays inactive and Pi shows a warning when a UI is available. Check that `herdr --skill` works on PATH, then use `/reload`. Before Herdr control, Pi is instructed to check `HERDR_ENV=1` and read the full live manual; if loading fails or the output is empty or truncated, it must stop and report the blocker.
 
 ## Delegation limits
 
@@ -58,7 +59,7 @@ Flock guides how Pi delegates; it is **not a sandbox or a technical security bou
 - **Clean up afterward.** Pi should close workers and panes it created after verifying results, leaving existing panes untouched.
 - **No hidden workers.** If Herdr cannot run a visible worker, Pi should tell you—not quietly use a hidden one.
 
-Flock's instructions also use part of the model's context window. Loading a separate Herdr skill can duplicate those instructions and consume extra context tokens.
+`piHerdrFlock.compact` defaults to `true`: only the load pointer and delegation preference occupy startup context. The full upstream manual is loaded on demand, not copied or maintained by Flock. Set `compact` to `false` to inject the full live manual at startup instead. Run `/reload` after changing it.
 
 See [the technical vision](https://github.com/Ryu-CZ/pi-herdr-flock/blob/main/VISION.md) for development and design details.
 

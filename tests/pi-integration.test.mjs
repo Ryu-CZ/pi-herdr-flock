@@ -88,7 +88,8 @@ test("real Pi prompt dispatch coexists with another extension and survives compa
   const sections = buildSystemPromptSections(first.systemPromptOptions);
   assert.equal(sections.companion, "<companion>\nanother extension\n</companion>");
   assert.equal(sections.unrelated, "<unrelated>\nkeep\n</unrelated>");
-  assert.ok(sections.pi_herdr_flock.includes(" complete skill\n"));
+  assert.ok(!sections.pi_herdr_flock.includes("complete skill"));
+  assert.ok(sections.pi_herdr_flock.includes("Then run `herdr --skill` and read its full output"));
   assert.deepEqual(first.messages, [], "no custom conversation-message injection");
   assert.equal(first.systemPromptOptions.forceSystemPrompt, undefined);
 
@@ -109,17 +110,18 @@ test("real Pi prompt dispatch coexists with another extension and survives compa
   assert.deepEqual(h.errors, []);
 });
 
-test("forced prompts receive the live skill and policy in model-visible text", async () => {
-  const h = await harness(async () => success("live Herdr skill"));
+test("forced prompts receive only the load pointer and policy in model-visible text", async () => {
+  const h = await harness(async () => success("UPSTREAM_MANUAL_SENTINEL"));
   await h.start("startup");
   for (let i = 0; i < 3; i++) {
     const turn = await h.turn("another extension's forced prompt");
     const state = buildSystemPromptState(turn.systemPromptOptions);
     assert.ok(state.content.startsWith("another extension's forced prompt\n\n<pi_herdr_flock>\n"));
-    assert.ok(state.content.includes("live Herdr skill"));
+    assert.ok(!state.content.includes("UPSTREAM_MANUAL_SENTINEL"));
+    assert.ok(state.content.includes("Then run `herdr --skill` and read its full output"));
     assert.ok(state.content.includes("## Pi Herdr Flock — local delegation preference"));
     assert.equal(state.content.match(/<pi_herdr_flock>/g).length, 1);
-    assert.ok(turn.systemPromptOptions.sections.pi_herdr_flock.includes("live Herdr skill"));
+    assert.ok(!turn.systemPromptOptions.sections.pi_herdr_flock.includes("UPSTREAM_MANUAL_SENTINEL"));
   }
   delete process.env.HERDR_ENV;
   const inactive = await h.turn("another extension's forced prompt");
@@ -141,7 +143,8 @@ test("real guarded Pi contexts ignore both late outcomes after reload teardown",
     assert.deepEqual(old.errors, []);
     assert.deepEqual(old.warnings, []);
     const next = await latest.turn();
-    assert.ok(next.systemPromptOptions.sections.pi_herdr_flock.startsWith("latest\n\n"));
+    assert.ok(next.systemPromptOptions.sections.pi_herdr_flock.startsWith("## Herdr — load on demand"));
+    assert.ok(!next.systemPromptOptions.sections.pi_herdr_flock.includes("latest"));
     assert.equal(latest.statuses.get("pi_herdr_flock"), "🐑 Flock");
     assert.deepEqual(latest.errors, []);
   }
@@ -159,7 +162,10 @@ test("Pi session-transition start reasons refresh cached instructions and clear 
     if (index === 2) {
       assert.equal(turn.systemPromptOptions.sections.pi_herdr_flock, undefined);
       assert.equal(h.statuses.size, 0);
-    } else assert.ok(turn.systemPromptOptions.sections.pi_herdr_flock.startsWith(`skill ${index + 1}\n\n`));
+    } else {
+      assert.ok(turn.systemPromptOptions.sections.pi_herdr_flock.startsWith("## Herdr — load on demand"));
+      assert.ok(!turn.systemPromptOptions.sections.pi_herdr_flock.includes(`skill ${index + 1}`));
+    }
   }
   assert.equal(calls, 5);
   assert.equal(h.warnings.length, 1);
@@ -177,11 +183,12 @@ test("Pi starts without user prompt or images retain Flock policy", async () => 
       cwd: process.cwd(), sections: { unrelated: "keep" }, forceSystemPrompt,
     });
     const state = buildSystemPromptState(result.systemPromptOptions);
-    assert.ok(result.systemPromptOptions.sections.pi_herdr_flock.includes("live custom-run skill"));
+    assert.ok(!result.systemPromptOptions.sections.pi_herdr_flock.includes("live custom-run skill"));
     assert.equal(result.systemPromptOptions.sections.unrelated, "keep");
     assert.equal(result.systemPromptOptions.sections.companion, "another extension");
     const rendered = forceSystemPrompt === undefined ? state.sections.pi_herdr_flock : state.content;
-    assert.ok(rendered.includes("live custom-run skill"));
+    assert.ok(!rendered.includes("live custom-run skill"));
+    assert.ok(rendered.includes("Then run `herdr --skill` and read its full output"));
     assert.ok(rendered.includes("## Pi Herdr Flock — local delegation preference"));
     assert.equal(rendered.match(/<pi_herdr_flock>/g).length, 1);
     if (forceSystemPrompt !== undefined) {

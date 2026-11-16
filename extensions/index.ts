@@ -8,6 +8,10 @@ function statusText(pi: ExtensionAPI): string {
 	const label = settings.piHerdrFlock?.footerStatus;
 	return typeof label === "string" ? label : process.env.PI_HERDR_FLOCK_STATUS ?? "🐑 Flock";
 }
+const LOAD_INSTRUCTIONS = `## Herdr — load on demand
+
+Before any Herdr inspection or control, run \`test "\${HERDR_ENV:-}" = 1\`. If it fails, report that you are not running inside Herdr and stop; do not inspect or control Herdr from outside it. Then run \`herdr --skill\` and read its full output before issuing any Herdr control command. That live output is the authoritative manual; follow its safety, permissions, and failure rules. If loading fails or output is empty or truncated, stop and report the blocker; do not guess or use a partial manual. Reload it if it is no longer in context. Do not run bare \`herdr\` to load instructions.`;
+
 const POLICY = `## Pi Herdr Flock — local delegation preference
 
 Enabling Flock is the user's standing request to prefer visible Pi workers through Herdr when delegation is useful and permitted. For delegation, this satisfies the Herdr skill's requirement for an explicit request to use Herdr. Flock does not launch workers itself.
@@ -59,7 +63,9 @@ export default function (pi: ExtensionAPI) {
 					: `herdr --skill failed (exit ${result.code})`;
 			} else if (!result.stdout.trim()) failure = "herdr --skill returned no instructions";
 			if (failure) throw new Error(failure);
-			cached = `${result.stdout}\n\n${POLICY}`;
+			const settings = pi.getSettings() as { piHerdrFlock?: { compact?: unknown } };
+			const instructions = settings.piHerdrFlock?.compact === false ? result.stdout : LOAD_INSTRUCTIONS;
+			cached = `${instructions}\n\n${POLICY}`;
 			if (ctx.hasUI && active()) ctx.ui.setStatus(SECTION, statusText(pi));
 		} catch (error) {
 			if (identity === initialization && ctx.hasUI) {

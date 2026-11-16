@@ -56,13 +56,35 @@ test("each missing activation variable prevents fetch and removes only owned con
   }
 });
 
-test("full output and policy reassert one section across turns and fresh post-compaction options", async () => {
+test("compact setting defaults to true and false restores the full live manual", async () => {
+  for (const compact of [undefined, true, false]) {
+    const h = setup(undefined, true, { piHerdrFlock: { compact } });
+    await h.start();
+    const content = h.turn().pi_herdr_flock;
+    assert.equal(content.includes("live skill"), compact === false);
+    assert.equal(content.includes("## Herdr — load on demand"), compact !== false);
+    assert.ok(content.includes("## Pi Herdr Flock — local delegation preference"));
+  }
+});
+
+test("startup injects only a load pointer and policy across turns and compaction", async () => {
   const stdout = "  live skill\n" + "x".repeat(20000) + "\n";
   const h = setup(async () => ({ code: 0, killed: false, stdout }));
   await h.start();
   assert.deepEqual(h.calls, [["herdr", ["--skill"], { timeout: 5000 }]]);
   const sections = h.turn({ other: "keep" });
-  assert.ok(sections.pi_herdr_flock.startsWith(stdout + "\n\n"));
+  assert.ok(!sections.pi_herdr_flock.includes(stdout.trim()));
+  assert.ok(!sections.pi_herdr_flock.includes("live skill"));
+  assert.ok(sections.pi_herdr_flock.length < 2500);
+  for (const clause of [
+    'test "${HERDR_ENV:-}" = 1',
+    "Then run `herdr --skill` and read its full output",
+    "before issuing any Herdr control command",
+    "authoritative manual",
+    "If loading fails or output is empty or truncated, stop and report the blocker",
+    "Reload it if it is no longer in context",
+    "do not inspect or control Herdr from outside it",
+  ]) assert.ok(sections.pi_herdr_flock.includes(clause), `missing load instruction: ${clause}`);
   for (const clause of [
     "standing request to prefer visible Pi workers through Herdr",
     "when delegation is useful and permitted",
@@ -142,7 +164,8 @@ test("superseded successful and failed fetches cannot replace cache or warn", as
     if (rejected) pending[0].reject(new Error("late"));
     else pending[0].resolve({ code: 0, killed: false, stdout: "obsolete" });
     await old;
-    assert.ok(h.turn().pi_herdr_flock.startsWith("latest\n\n"));
+    assert.ok(h.turn().pi_herdr_flock.startsWith("## Herdr — load on demand"));
+    assert.ok(!h.turn().pi_herdr_flock.includes("obsolete"));
     assert.equal(h.warnings.length, 0);
   }
 });

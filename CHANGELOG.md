@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `piHerdrFlock.compact` (default `true`); set it to `false` to load full Herdr instructions at startup
+
 ### Changed
 
+- Use less startup context by loading the full Herdr instructions only when needed
 - Reduce installation size by keeping developer documentation on GitHub
 
 ## [0.3.1] - 2026-11-05
